@@ -1,49 +1,37 @@
 package com.ifpr.backend.service;
 
-import java.util.List;
+import java.util.UUID;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.thymeleaf.context.Context;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.ifpr.backend.model.Usuario;
 import com.ifpr.backend.repository.UsuarioRepository;
 
 @Service
 public class UsuarioService {
-    
-    @Autowired// faz a gerencia de todas as dependencias
-    private UsuarioRepository repository;
 
-    @Autowired
-    private EnvioEmailService emailService;
+    private final UsuarioRepository usuarioRepository;
 
-    public Usuario inserir(Usuario usuario){
-        Usuario usuarioBanco = repository.save(usuario);
-        Context context = new Context();
-        context.setVariable("nome", usuario.getNome());
-        emailService.enviarEmailTemplate(usuario.getEmail(), "Sucesso", "novoCadastro", context);
-        return repository.save(usuario);
+    public UsuarioService(UsuarioRepository usuarioRepository) {
+        this.usuarioRepository = usuarioRepository;
     }
 
-    public List<Usuario> listarTodos(){
-        return repository.findAll();
+    @Transactional
+    public Usuario cadastrar(Usuario usuario) {
+        if (usuarioRepository.existsByEmail(usuario.getEmail())) {
+            throw new IllegalArgumentException("E-mail já cadastrado no sistema.");
+        }
+        return usuarioRepository.save(usuario);
     }
 
-    public Usuario buscarPorId(Long id) {
-        Usuario usuario = repository.findById(id).orElseThrow(() -> new RuntimeException("Usuario não existe"));
-        return usuario;
+    public Usuario buscarPorId(UUID id) {
+        return usuarioRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Usuário não encontrado."));
     }
 
-    public void remover(Long id){
-      Usuario usuario = buscarPorId(id);  
-      repository.delete(usuario);
-    }
-
-    public Usuario alterar(Usuario usuario){
-        Usuario usuarioDB = buscarPorId(usuario.getId());
-        usuarioDB.setNome(usuario.getNome());
-        usuarioDB.setEmail(usuario.getEmail());
-        return repository.save(usuarioDB);
+    public Usuario buscarPorEmail(String email) {
+        return usuarioRepository.findByEmail(email)
+                .orElseThrow(() -> new IllegalArgumentException("Usuário não encontrado."));
     }
 }
