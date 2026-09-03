@@ -7,22 +7,23 @@ import jakarta.validation.constraints.Size;
 public class UsuarioRequestDTO {
 
     @NotBlank(message = "O nome é obrigatório.")
-    private String nome;
+    @Size(min = 2, max = 100, message = "O nome deve ter entre 2 e 100 caracteres.")
+    private String name;
 
     @NotBlank(message = "O e-mail é obrigatório.")
-    @Email(message = "Formato de e-mail inválido.")
+    @Email(message = "Forneça um endereço de e-mail válido.")
     private String email;
 
     @NotBlank(message = "A senha é obrigatória.")
-    @Size(min = 6, message = "A senha deve ter no mínimo 6 caracteres.")
-    private String senha;
+    @Size(min = 8, max = 100, message = "A senha deve ter entre 8 e 100 caracteres.")
+    private String password;
 
-    public String getNome() { return nome; }
-    public void setNome(String nome) { this.nome = nome; }
+    public String getName() { return name; }
+    public void setName(String name) { this.name = name; }
 
     public String getEmail() { return email; }
     public void setEmail(String email) { this.email = email; }
 
-    public String getSenha() { return senha; }
-    public void setSenha(String senha) { this.senha = senha; }
+    public String getPassword() { return password; }
+    public void setPassword(String password) { this.password = password; }
 }
