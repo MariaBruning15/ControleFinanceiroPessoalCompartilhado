@@ -31,7 +31,6 @@ public class Categoria {
     @Column(nullable = false)
     private TipoTransacao tipo;
 
-    //nulo é uma categoria padrão e preenchido é categoria personalizada
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "usuario_id")
     private Usuario usuario;

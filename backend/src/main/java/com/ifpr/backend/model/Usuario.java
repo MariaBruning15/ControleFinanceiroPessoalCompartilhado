@@ -1,52 +1,67 @@
 package com.ifpr.backend.model;
 
+import java.time.LocalDateTime;
+import java.util.UUID;
 
-
-import java.util.List;
-
-import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.OneToMany;
-import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Size;
-import lombok.AccessLevel;
-import lombok.Data;
-import lombok.Setter;
+import jakarta.persistence.PrePersist;
+import jakarta.persistence.Table;
+import jakarta.persistence.UniqueConstraint;
 
 @Entity
-@Data
-
+@Table(
+    name = "tb_usuario",
+    uniqueConstraints = {
+        @UniqueConstraint(columnNames = "email")
+    }
+)
 public class Usuario {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private long id;
+    @GeneratedValue(strategy = GenerationType.UUID)
+    private UUID id;
 
-    @NotBlank(message = "Nome obrigatório")
-    @Size(min =10, message = "Insira um nome completo")
+    @Column(nullable = false, length = 100)
     private String nome;
 
-    @Email(message = "Insira um email valido")
+    @Column(nullable = false, unique = true, length = 150)
     private String email;
+
+    @Column(nullable = false, length = 255)
     private String senha;
 
-    @OneToMany(mappedBy = "usuario", cascade = CascadeType.ALL, orphanRemoval = true)
-    //Cascade: todas as informações do crud são automaticamentes salvas em UsiarioPerfil
-    //orphanRemoval: sempre que um usuario for removido o UsuarioPerfil é removido tambem
-    @Setter(value = AccessLevel.NONE)
-    private List<UsuarioPerfil> usuarioPerfil;
+    @Column(nullable = false, updatable = false)
+    private LocalDateTime criadoEm;
 
-
-    public void setUsuarioPerfil(List<UsuarioPerfil> usuariosPerfils){
-        if(usuariosPerfils!=null){
-            for(UsuarioPerfil u:usuariosPerfils){
-                u.setUsuario(this);
-            }
-        }
-        this.usuarioPerfil = usuariosPerfils;
+    @PrePersist
+    public void onCreate() {
+        this.criadoEm = LocalDateTime.now();
     }
+
+    public Usuario() {}
+
+    public Usuario(String nome, String email, String senha) {
+        this.nome = nome;
+        this.email = email;
+        this.senha = senha;
+    }
+
+    public UUID getId() { return id; }
+    public void setId(UUID id) { this.id = id; }
+
+    public String getNome() { return nome; }
+    public void setNome(String nome) { this.nome = nome; }
+
+    public String getEmail() { return email; }
+    public void setEmail(String email) { this.email = email; }
+
+    public String getSenha() { return senha; }
+    public void setSenha(String senha) { this.senha = senha; }
+
+    public LocalDateTime getCriadoEm() { return criadoEm; }
+    public void setCriadoEm(LocalDateTime criadoEm) { this.criadoEm = criadoEm; }
 }
