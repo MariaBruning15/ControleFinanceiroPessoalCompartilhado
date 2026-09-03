@@ -67,4 +67,11 @@ public class GlobalExceptionHandler {
         error.put("message", ex.getMessage());
         return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY).body(error);
     }
+
+    @ExceptionHandler(CategoriaTransacoesException.class)
+    public ResponseEntity<Map<String, String>> handleCategoriaComTransacoes(CategoriaTransacoesException ex) {
+        Map<String, String> error = new HashMap<>();
+        error.put("message", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY).body(error); // Retorna HTTP 422
+    }
 }
