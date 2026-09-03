@@ -1,12 +1,15 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import './Cadastro.css';
 import CardComponent from '../../components/Card/Card';
 import api from '../../services/api';
-import './Login.css';
 
-function Login() {
+function Cadastro() {
+  const [nome, setNome] = useState('');
   const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const [senha, setSenha] = useState('');
+  const [confirmarSenha, setConfirmarSenha] = useState('');
+  
   const [erro, setErro] = useState('');
   const [carregando, setCarregando] = useState(false);
 
@@ -15,28 +18,30 @@ function Login() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setErro('');
+
+    // Validação de confirmação de senha
+    if (senha !== confirmarSenha) {
+      setErro('As senhas não coincidem.');
+      return;
+    }
+
     setCarregando(true);
 
     try {
-      // Faz a chamada POST enviando email e senha esperados pelo Spring Boot
-      const response = await api.post('/auth/login', {
+      // Faz o POST enviando o payload no formato esperado pelo Spring Boot (name, email, password)
+      await api.post('/auth/register', {
+        name: nome,
         email: email,
-        password: password,
+        password: senha,
       });
 
-      // O backend retorna o token de acesso (accessToken)
-      const { accessToken } = response.data;
-
-      // Salva o token no localStorage para ser usado nas rotas protegidas
-      localStorage.setItem('token', accessToken);
-
-      // Redireciona o usuário para o dashboard
-      navigate('/dashboard');
+      // Redireciona o usuário para a tela de login após cadastrar com sucesso
+      navigate('/');
     } catch (err) {
       if (err.response && err.response.data && err.response.data.message) {
         setErro(err.response.data.message);
       } else {
-        setErro('E-mail ou senha inválidos. Tente novamente.');
+        setErro('Erro ao realizar o cadastro. Tente novamente.');
       }
     } finally {
       setCarregando(false);
@@ -44,50 +49,72 @@ function Login() {
   };
 
   return (
-    <div className="login-page">
-      <CardComponent subtitle="Login">
-        <form className="d-flex flex-column align-items-center" onSubmit={handleSubmit}>
+    <div className="cadastro-page">
+      <CardComponent subtitle="Cadastro">
+        <form onSubmit={handleSubmit} className="w-100 d-flex flex-column align-items-center">
           <div className="inputs w-100">
             {erro && <div className="alert alert-danger text-center p-2 mb-3">{erro}</div>}
 
-            <div className="form-floating mb-3">
+            <div className="form-floating mb-3 w-100">
+              <input
+                type="text"
+                className="form-control"
+                id="floatingName"
+                placeholder="Seu Nome"
+                value={nome}
+                onChange={(e) => setNome(e.target.value)}
+                required
+              />
+              <label htmlFor="floatingName">Nome Completo</label>
+            </div>
+
+            <div className="form-floating mb-3 w-100">
               <input
                 type="email"
                 className="form-control"
-                id="floatingInput"
+                id="floatingEmail"
                 placeholder="name@example.com"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
               />
-              <label htmlFor="floatingInput">Email</label>
+              <label htmlFor="floatingEmail">E-mail</label>
             </div>
 
-            <div className="form-floating mb-3">
+            <div className="form-floating mb-3 w-100">
               <input
                 type="password"
                 className="form-control"
                 id="floatingPassword"
-                placeholder="Password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
+                placeholder="Senha"
+                value={senha}
+                onChange={(e) => setSenha(e.target.value)}
                 required
               />
               <label htmlFor="floatingPassword">Senha</label>
             </div>
 
-            <Link to="/recuperar-senha" className="esqueci-senha-link">
-              Esqueceu sua senha?
-            </Link>
+            <div className="form-floating mb-3 w-100">
+              <input
+                type="password"
+                className="form-control"
+                id="floatingConfirmPassword"
+                placeholder="Confirmar Senha"
+                value={confirmarSenha}
+                onChange={(e) => setConfirmarSenha(e.target.value)}
+                required
+              />
+              <label htmlFor="floatingConfirmPassword">Confirmar Senha</label>
+            </div>
           </div>
 
           <button type="submit" className="btn btn-custom fs-5 w-50" disabled={carregando}>
-            {carregando ? 'Entrando...' : 'Login'}
+            {carregando ? 'Cadastrando...' : 'Cadastrar'}
           </button>
 
           <div className="cadastro mt-3">
-            <p>Não tem uma conta?</p>
-            <Link to="/cadastro" className="cadastre-link">Cadastre-se</Link>
+            <p>Já possui uma conta?</p>
+            <Link to="/">Fazer Login</Link>
           </div>
         </form>
       </CardComponent>
@@ -95,4 +122,4 @@ function Login() {
   );
 }
 
-export default Login;
+export default Cadastro;
