@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/api/v1/wallets/{walletId}/transactions")
+@RequestMapping("/carteiras/{carteiraId}/transacoes")
 public class TransacaoController {
 
     private final TransacaoService transacaoService;

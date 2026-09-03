@@ -26,7 +26,7 @@ import com.ifpr.backend.service.CarteiraService;
 import jakarta.validation.Valid;
 
 @RestController
-@RequestMapping("/api/v1/wallets")
+@RequestMapping("/carteiras")
 public class CarteiraController {
 
     private final CarteiraService carteiraService;

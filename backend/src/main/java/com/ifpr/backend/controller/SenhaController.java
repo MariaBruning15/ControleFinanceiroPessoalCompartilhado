@@ -14,7 +14,7 @@ import com.ifpr.backend.service.TokenRedefinicaoSenhaService;
 import jakarta.validation.Valid;
 
 @RestController
-@RequestMapping("/api/senha")
+@RequestMapping("/senha")
 public class SenhaController {
 
     private final TokenRedefinicaoSenhaService tokenService;

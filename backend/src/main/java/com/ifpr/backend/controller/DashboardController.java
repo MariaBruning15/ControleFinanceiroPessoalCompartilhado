@@ -16,7 +16,7 @@ import com.ifpr.backend.dto.DashboardSummaryDTO;
 import com.ifpr.backend.service.TransacaoService;
 
 @RestController
-@RequestMapping("/api/v1/wallets/{walletId}/summary")
+@RequestMapping("/carteiras/{carteiraId}/summary")
 public class DashboardController {
 
     private final TransacaoService transacaoService;
