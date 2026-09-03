@@ -74,4 +74,9 @@ public class GlobalExceptionHandler {
         error.put("message", ex.getMessage());
         return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY).body(error); // Retorna HTTP 422
     }
+
+    @ExceptionHandler(RecursoJaExisteException.class)
+        public ResponseEntity<Map<String, String>> handleRecursoJaExiste(RecursoJaExisteException ex) {
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(Map.of("message", ex.getMessage())); 
+    }
 }
