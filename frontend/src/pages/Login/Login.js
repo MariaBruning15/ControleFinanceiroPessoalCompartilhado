@@ -1,15 +1,12 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import './Cadastro.css';
 import CardComponent from '../../components/Card/Card';
-import api from '../../services/api';
+import authService from '../../services/AuthService';
+import './Login.css';
 
-function Cadastro() {
-  const [nome, setNome] = useState('');
+function Login() {
   const [email, setEmail] = useState('');
-  const [senha, setSenha] = useState('');
-  const [confirmarSenha, setConfirmarSenha] = useState('');
-  
+  const [password, setPassword] = useState('');
   const [erro, setErro] = useState('');
   const [carregando, setCarregando] = useState(false);
 
@@ -18,30 +15,16 @@ function Cadastro() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setErro('');
-
-    // Validação de confirmação de senha
-    if (senha !== confirmarSenha) {
-      setErro('As senhas não coincidem.');
-      return;
-    }
-
     setCarregando(true);
 
     try {
-      // Faz o POST enviando o payload no formato esperado pelo Spring Boot (name, email, password)
-      await api.post('/auth/register', {
-        name: nome,
-        email: email,
-        password: senha,
-      });
-
-      // Redireciona o usuário para a tela de login após cadastrar com sucesso
-      navigate('/');
+      await authService.login(email, password);
+      navigate('/dashboard');
     } catch (err) {
       if (err.response && err.response.data && err.response.data.message) {
         setErro(err.response.data.message);
       } else {
-        setErro('Erro ao realizar o cadastro. Tente novamente.');
+        setErro('E-mail ou senha inválidos. Tente novamente.');
       }
     } finally {
       setCarregando(false);
@@ -49,72 +32,50 @@ function Cadastro() {
   };
 
   return (
-    <div className="cadastro-page">
-      <CardComponent subtitle="Cadastro">
-        <form onSubmit={handleSubmit} className="w-100 d-flex flex-column align-items-center">
+    <div className="login-page">
+      <CardComponent subtitle="Login">
+        <form className="d-flex flex-column align-items-center" onSubmit={handleSubmit}>
           <div className="inputs w-100">
             {erro && <div className="alert alert-danger text-center p-2 mb-3">{erro}</div>}
 
-            <div className="form-floating mb-3 w-100">
-              <input
-                type="text"
-                className="form-control"
-                id="floatingName"
-                placeholder="Seu Nome"
-                value={nome}
-                onChange={(e) => setNome(e.target.value)}
-                required
-              />
-              <label htmlFor="floatingName">Nome Completo</label>
-            </div>
-
-            <div className="form-floating mb-3 w-100">
+            <div className="form-floating mb-3">
               <input
                 type="email"
                 className="form-control"
-                id="floatingEmail"
+                id="floatingInput"
                 placeholder="name@example.com"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
               />
-              <label htmlFor="floatingEmail">E-mail</label>
+              <label htmlFor="floatingInput">Email</label>
             </div>
 
-            <div className="form-floating mb-3 w-100">
+            <div className="form-floating mb-3">
               <input
                 type="password"
                 className="form-control"
                 id="floatingPassword"
-                placeholder="Senha"
-                value={senha}
-                onChange={(e) => setSenha(e.target.value)}
+                placeholder="Password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
                 required
               />
               <label htmlFor="floatingPassword">Senha</label>
             </div>
 
-            <div className="form-floating mb-3 w-100">
-              <input
-                type="password"
-                className="form-control"
-                id="floatingConfirmPassword"
-                placeholder="Confirmar Senha"
-                value={confirmarSenha}
-                onChange={(e) => setConfirmarSenha(e.target.value)}
-                required
-              />
-              <label htmlFor="floatingConfirmPassword">Confirmar Senha</label>
-            </div>
+            <Link to="/recuperar-senha" className="esqueci-senha-link">
+              Esqueceu sua senha?
+            </Link>
           </div>
 
           <button type="submit" className="btn btn-custom fs-5 w-50" disabled={carregando}>
-            {carregando ? 'Cadastrando...' : 'Cadastrar'}
+            {carregando ? 'Entrando...' : 'Login'}
           </button>
 
           <div className="cadastro mt-3">
-            <p>Já possui uma conta?</p>
-            <Link to="/">Fazer Login</Link>
+            <p>Não tem uma conta?</p>
+            <Link to="/cadastro" className="cadastre-link">Cadastre-se</Link>
           </div>
         </form>
       </CardComponent>
@@ -122,4 +83,4 @@ function Cadastro() {
   );
 }
 
-export default Cadastro;
+export default Login;
