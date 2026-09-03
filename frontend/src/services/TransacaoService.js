@@ -2,22 +2,26 @@ import BaseService from './BaseService';
 
 class TransacaoService extends BaseService {
   constructor() {
-    super('/transacoes');
+    super('/carteiras');
   }
 
-  async buscarRecentes(limite = 5) {
-    const resposta = await this.api.get(`${this.endPoint}/recentes?limite=${limite}`);
-    return resposta;
+  async obterResumoDashboard(walletId, startDate = '', endDate = '') {
+    const params = new URLSearchParams();
+    if (startDate) params.append('startDate', startDate);
+    if (endDate) params.append('endDate', endDate);
+
+    const url = `${this.endPoint}/${walletId}/transacoes/resumo-dashboard?${params.toString()}`;
+    return await this.api.get(url);
   }
 
-  async buscarDadosGrafico(meses = 6) {
-    const resposta = await this.api.get(`${this.endPoint}/grafico-mensal?meses=${meses}`);
-    return resposta;
+  async listarRecentes(walletId, page = 0, size = 5) {
+    const url = `${this.endPoint}/${walletId}/transacoes?page=${page}&size=${size}&sort=data,desc`;
+    return await this.api.get(url);
   }
 
-  async buscarResumo() {
-    const resposta = await this.api.get(`${this.endPoint}/resumo`);
-    return resposta;
+  async criarTransacao(walletId, transacaoDTO) {
+    const url = `${this.endPoint}/${walletId}/transacoes`;
+    return await this.api.post(url, transacaoDTO);
   }
 }
 

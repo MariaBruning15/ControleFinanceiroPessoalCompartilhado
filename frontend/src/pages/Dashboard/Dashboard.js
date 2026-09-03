@@ -1,195 +1,337 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { 
-  BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Legend, CartesianGrid 
-} from 'recharts';
-import { 
-  TrendingUp, TrendingDown, DollarSign, LogOut, User, 
-  LayoutDashboard, CreditCard, Tag, Settings 
-} from 'lucide-react';
-
 import transacaoService from '../../services/TransacaoService';
-import usuarioService from '../../services/UsuarioService';
-import authService from '../../services/AuthService';
 import './Dashboard.css';
+
+import {
+  Chart as ChartJS,
+  CategoryScale,
+  LinearScale,
+  BarElement,
+  Title,
+  Tooltip,
+  Legend,
+} from 'chart.js';
+import { Bar } from 'react-chartjs-2';
+
+ChartJS.register(
+  CategoryScale,
+  LinearScale,
+  BarElement,
+  Title,
+  Tooltip,
+  Legend
+);
 
 function Dashboard() {
   const navigate = useNavigate();
-  const [loading, setLoading] = useState(true);
-  const [dadosGrafico, setDadosGrafico] = useState([]);
-  const [transacoes, setTransacoes] = useState([]);
-  const [usuario, setUsuario] = useState({ nome: 'Usuário', email: '' });
+
+  const WALLET_ID = localStorage.getItem('carteiraId') || '123e4567-e89b-12d3-a456-426614174000';
+  const usuarioNome = localStorage.getItem('usuarioNome') || 'Usuário';
+  const usuarioInicial = usuarioNome.charAt(0).toUpperCase();
+
+  const [resumo, setResumo] = useState({
+    saldoTotal: 0,
+    totalReceitas: 0,
+    totalDespesas: 0,
+  });
+
+  const [dadosGrafico, setDadosGrafico] = useState({
+    labels: [],
+    datasets: [],
+  });
+
+  const [recentes, setRecentes] = useState([]);
+  const [carregando, setCarregando] = useState(true);
+
+  const [exibirModal, setExibirModal] = useState(false);
+  const [descricao, setDescricao] = useState('');
+  const [valor, setValor] = useState('');
+  const [tipo, setTipo] = useState('RECEITA');
+  const [data, setData] = useState(new Date().toISOString().split('T')[0]);
+  const [salvando, setSalvando] = useState(false);
 
   useEffect(() => {
-    async function carregarDadosDashboard() {
-      try {
-        setLoading(true);
-
-        // Executa as chamadas à API em paralelo para otimizar o carregamento
-        const [resPerfil, resGrafico, resTransacoes] = await Promise.all([
-          usuarioService.buscarPerfil(),
-          transacaoService.buscarDadosGrafico(6),
-          transacaoService.buscarRecentes(5)
-        ]);
-
-        if (resPerfil?.data) setUsuario(resPerfil.data);
-        if (resGrafico?.data) setDadosGrafico(resGrafico.data);
-        if (resTransacoes?.data) setTransacoes(resTransacoes.data);
-      } catch (error) {
-        console.error('Erro ao carregar dados do dashboard:', error);
-      } finally {
-        setLoading(false);
-      }
-    }
-
     carregarDadosDashboard();
   }, []);
 
+  const carregarDadosDashboard = async () => {
+    try {
+      setCarregando(true);
+
+      const [summaryResp, recentesResp] = await Promise.all([
+        transacaoService.obterResumoDashboard(WALLET_ID),
+        transacaoService.listarRecentes(WALLET_ID, 0, 5),
+      ]);
+
+      if (summaryResp?.data) {
+        const summary = summaryResp.data;
+
+        setResumo({
+          saldoTotal: summary.balance || 0,
+          totalReceitas: summary.totalIncome || 0,
+          totalDespesas: summary.totalExpense || 0,
+        });
+
+        if (summary.byMonth && Array.isArray(summary.byMonth)) {
+          const labels = summary.byMonth.map((item) => item.month);
+          const despesas = summary.byMonth.map((item) => item.expense || 0);
+          const receitas = summary.byMonth.map((item) => item.income || 0);
+
+          setDadosGrafico({
+            labels: labels,
+            datasets: [
+              {
+                label: 'Despesas',
+                data: despesas,
+                backgroundColor: '#e74c3c',
+                borderRadius: 4,
+              },
+              {
+                label: 'Receitas',
+                data: receitas,
+                backgroundColor: '#2ecc71',
+                borderRadius: 4,
+              },
+            ],
+          });
+        }
+      }
+
+      if (recentesResp?.data?.content) {
+        setRecentes(recentesResp.data.content);
+      } else if (Array.isArray(recentesResp?.data)) {
+        setRecentes(recentesResp.data);
+      }
+
+    } catch (erro) {
+      console.error('Erro ao carregar dados do dashboard:', erro);
+    } finally {
+      setCarregando(false);
+    }
+  };
+
+  const handleCriarTransacao = async (e) => {
+    e.preventDefault();
+    try {
+      setSalvando(true);
+
+      const payload = {
+        descricao,
+        valor: parseFloat(valor),
+        tipo, // 'RECEITA' ou 'DESPESA'
+        data,
+      };
+
+      await transacaoService.criarTransacao(WALLET_ID, payload);
+
+      setDescricao('');
+      setValor('');
+      setExibirModal(false);
+
+      await carregarDadosDashboard();
+    } catch (erro) {
+      console.error('Erro ao salvar transação:', erro.response?.data || erro.message);
+      alert('Erro ao salvar a transação. Verifique se os dados estão corretos.');
+    } finally {
+      setSalvando(false);
+    }
+  };
+
   const handleLogout = () => {
-    authService.logout();
+    localStorage.clear();
     navigate('/');
   };
 
-  // Cálculo dinâmico dos indicadores baseado nas transações carregadas
-  const totalReceitas = transacoes
-    .filter(t => t.tipo === 'receita')
-    .reduce((acc, curr) => acc + curr.valor, 0);
-
-  const totalDespesas = transacoes
-    .filter(t => t.tipo === 'despesa')
-    .reduce((acc, curr) => acc + curr.valor, 0);
-
-  const saldoAtual = totalReceitas - totalDespesas;
-
-  if (loading) {
-    return (
-      <div className="loading-container">
-        <div className="spinner-border text-light" role="status">
-          <span className="visually-hidden">Carregando...</span>
-        </div>
-        <p className="mt-3 text-white fs-5">Carregando dados financeiros...</p>
-      </div>
-    );
-  }
+  const opcoesGrafico = {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: {
+        position: 'bottom',
+        labels: { color: '#ffffff' },
+      },
+    },
+    scales: {
+      x: {
+        ticks: { color: '#ffffff' },
+        grid: { display: false },
+      },
+      y: {
+        ticks: { color: '#ffffff' },
+        grid: { color: 'rgba(255, 255, 255, 0.1)' },
+      },
+    },
+  };
 
   return (
-    <div className="dashboard-layout">
-      {/* Menu Lateral (Sidebar) */}
-      <aside className="sidebar">
-        <div className="sidebar-brand">
-          <h2>Mercúrio</h2>
-        </div>
-        <nav className="sidebar-menu">
-          <button className="menu-item active">
-            <LayoutDashboard size={20} /> Dashboard
-          </button>
-          <button className="menu-item">
-            <CreditCard size={20} /> Transações
-          </button>
-          <button className="menu-item">
-            <Tag size={20} /> Categorias
-          </button>
-          <button className="menu-item" onClick={() => navigate('/alterar-senha')}>
-            <Settings size={20} /> Configurações
-          </button>
+    <div className="d-flex text-white min-vh-100" style={{ backgroundColor: '#1a1f36' }}>
+      
+      <aside className="p-3 border-end border-secondary d-flex flex-column" style={{ width: '240px', backgroundColor: '#141824' }}>
+        <h3 className="text-primary font-weight-bold mb-4">Mercúrio</h3>
+        <nav className="nav flex-column gap-2">
+          <button className="btn btn-primary text-start w-100">Dashboard</button>
+          <button className="btn btn-outline-light text-start w-100">Transações</button>
+          <button className="btn btn-outline-light text-start w-100">Categorias</button>
+          <button className="btn btn-outline-light text-start w-100">Perfil</button>
         </nav>
       </aside>
 
-      {/* Área Principal */}
-      <main className="main-content">
-        {/* Header Superior */}
-        <header className="dashboard-header">
-          <div className="user-info">
-            <div className="avatar">
-              <User size={22} />
+      <main className="flex-grow-1 d-flex flex-column">
+        
+        <header className="p-3 border-bottom border-secondary d-flex justify-content-between align-items-center" style={{ backgroundColor: '#141824' }}>
+          <h4 className="m-0">Resumo Financeiro</h4>
+          <div className="d-flex align-items-center gap-3">
+            <button className="btn btn-primary me-2" onClick={() => setExibirModal(true)}>
+              + Nova Transação
+            </button>
+            <div className="d-flex align-items-center gap-2">
+              <div className="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center fw-bold" style={{ width: '38px', height: '38px' }}>
+                {usuarioInicial}
+              </div>
+              <span>{usuarioNome}</span>
             </div>
-            <div>
-              <span className="user-name">Olá, {usuario.nome || usuario.name}</span>
-            </div>
+            <button className="btn btn-outline-danger btn-sm" onClick={handleLogout}>Sair</button>
           </div>
-          <button className="btn-logout" onClick={handleLogout} title="Sair">
-            <LogOut size={18} /> Sair
-          </button>
         </header>
 
-        {/* Conteúdo do Dashboard */}
-        <div className="dashboard-body">
-          <h1 className="page-title">Resumo Financeiro</h1>
-
-          {/* Cards de Indicadores */}
-          <div className="cards-grid">
-            <div className="card-kpi saldo">
-              <div className="kpi-icon"><DollarSign size={24} /></div>
-              <div className="kpi-info">
-                <span>Saldo Atual</span>
-                <h3>R$ {saldoAtual.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</h3>
-              </div>
+        <div className="p-4 flex-grow-1">
+          {carregando ? (
+            <div className="d-flex flex-column align-items-center justify-content-center h-100 py-5">
+              <div className="spinner-border text-primary mb-3" role="status"></div>
+              <p>Carregando informações financeiras...</p>
             </div>
-
-            <div className="card-kpi receita">
-              <div className="kpi-icon"><TrendingUp size={24} /></div>
-              <div className="kpi-info">
-                <span>Receitas (Mês)</span>
-                <h3>R$ {totalReceitas.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</h3>
+          ) : (
+            <>
+              <div className="row mb-4">
+                <div className="col-md-4 mb-3">
+                  <div className="card text-white p-3 border-0" style={{ backgroundColor: '#232943' }}>
+                    <small className="text-muted">Saldo Atual</small>
+                    <h3 className="text-primary mt-2">R$ {resumo.saldoTotal.toFixed(2)}</h3>
+                  </div>
+                </div>
+                <div className="col-md-4 mb-3">
+                  <div className="card text-white p-3 border-0" style={{ backgroundColor: '#232943' }}>
+                    <small className="text-muted">Receitas (Período)</small>
+                    <h3 className="text-success mt-2">R$ {resumo.totalReceitas.toFixed(2)}</h3>
+                  </div>
+                </div>
+                <div className="col-md-4 mb-3">
+                  <div className="card text-white p-3 border-0" style={{ backgroundColor: '#232943' }}>
+                    <small className="text-muted">Despesas (Período)</small>
+                    <h3 className="text-danger mt-2">R$ {resumo.totalDespesas.toFixed(2)}</h3>
+                  </div>
+                </div>
               </div>
-            </div>
 
-            <div className="card-kpi despesa">
-              <div className="kpi-icon"><TrendingDown size={24} /></div>
-              <div className="kpi-info">
-                <span>Despesas (Mês)</span>
-                <h3>R$ {totalDespesas.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</h3>
-              </div>
-            </div>
-          </div>
-
-          {/* Seção Central: Gráfico e Tabela */}
-          <div className="dashboard-grid">
-            {/* Gráfico Recharts */}
-            <div className="dashboard-card chart-card">
-              <h3>Balanço dos Últimos Meses</h3>
-              <div className="chart-wrapper">
-                <ResponsiveContainer width="100%" height={300}>
-                  <BarChart data={dadosGrafico} margin={{ top: 10, right: 10, left: -10, bottom: 0 }}>
-                    <CartesianGrid strokeDasharray="3 3" opacity={0.15} />
-                    <XAxis dataKey="mes" stroke="#ffffff80" />
-                    <YAxis stroke="#ffffff80" />
-                    <Tooltip 
-                      formatter={(val) => `R$ ${val.toLocaleString('pt-BR')}`}
-                      contentStyle={{ backgroundColor: '#202b53', borderColor: '#4a5b93', color: '#fff' }}
-                    />
-                    <Legend />
-                    <Bar dataKey="receitas" fill="#2e7d32" name="Receitas" radius={[4, 4, 0, 0]} />
-                    <Bar dataKey="despesas" fill="#d32f2f" name="Despesas" radius={[4, 4, 0, 0]} />
-                  </BarChart>
-                </ResponsiveContainer>
-              </div>
-            </div>
-
-            {/* Lista de Transações Recentes */}
-            <div className="dashboard-card list-card">
-              <h3>Lançamentos Recentes</h3>
-              <div className="transactions-list">
-                {transacoes.length === 0 ? (
-                  <p className="text-white-50 text-center my-auto">Nenhuma transação encontrada.</p>
-                ) : (
-                  transacoes.map((t) => (
-                    <div key={t.id} className="transaction-item">
-                      <div className="t-info">
-                        <span className="t-title">{t.descricao}</span>
-                        <span className="t-date">{t.data}</span>
-                      </div>
-                      <span className={`t-amount ${t.tipo}`}>
-                        {t.tipo === 'receita' ? '+' : '-'} R$ {Number(t.valor).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
-                      </span>
+              <div className="row">
+                <div className="col-lg-7 mb-4">
+                  <div className="card text-white p-3 h-100 border-0" style={{ backgroundColor: '#232943' }}>
+                    <h5 className="mb-3">Balanço dos Últimos Meses</h5>
+                    <div style={{ height: '300px' }}>
+                      {dadosGrafico.labels.length > 0 ? (
+                        <Bar data={dadosGrafico} options={opcoesGrafico} />
+                      ) : (
+                        <div className="d-flex h-100 align-items-center justify-content-center text-muted">
+                          Nenhum lançamento encontrado para montar o gráfico.
+                        </div>
+                      )}
                     </div>
-                  ))
-                )}
+                  </div>
+                </div>
+
+                <div className="col-lg-5 mb-4">
+                  <div className="card text-white p-3 h-100 border-0" style={{ backgroundColor: '#232943' }}>
+                    <h5 className="mb-3">Lançamentos Recentes</h5>
+                    {recentes.length > 0 ? (
+                      <ul className="list-group list-group-flush">
+                        {recentes.map((item, idx) => (
+                          <li key={item.id || idx} className="list-group-item bg-transparent text-white d-flex justify-content-between border-secondary px-0">
+                            <div>
+                              <div className="fw-bold">{item.descricao}</div>
+                              <small className="text-muted">{item.data}</small>
+                            </div>
+                            <span className={item.tipo === 'RECEITA' ? 'text-success fw-bold' : 'text-danger fw-bold'}>
+                              {item.tipo === 'RECEITA' ? '+' : '-'} R$ {item.valor?.toFixed(2)}
+                            </span>
+                          </li>
+                        ))}
+                      </ul>
+                    ) : (
+                      <p className="text-muted my-auto text-center py-4">Nenhuma transação cadastrada.</p>
+                    )}
+                  </div>
+                </div>
               </div>
+            </>
+          )}
+        </div>
+      </main>
+
+      {exibirModal && (
+        <div className="modal d-block" style={{ backgroundColor: 'rgba(0,0,0,0.7)' }}>
+          <div className="modal-dialog modal-dialog-centered">
+            <div className="modal-content text-white" style={{ backgroundColor: '#232943' }}>
+              <div className="modal-header border-secondary">
+                <h5 className="modal-title">Nova Transação</h5>
+                <button type="button" className="btn-close btn-close-white" onClick={() => setExibirModal(false)}></button>
+              </div>
+              <form onSubmit={handleCriarTransacao}>
+                <div className="modal-body">
+                  <div className="mb-3">
+                    <label className="form-label">Descrição</label>
+                    <input
+                      type="text"
+                      className="form-control"
+                      value={descricao}
+                      onChange={(e) => setDescricao(e.target.value)}
+                      placeholder="Ex: Mercado, Salário..."
+                      required
+                    />
+                  </div>
+                  <div className="mb-3">
+                    <label className="form-label">Valor (R$)</label>
+                    <input
+                      type="number"
+                      step="0.01"
+                      className="form-control"
+                      value={valor}
+                      onChange={(e) => setValor(e.target.value)}
+                      placeholder="0,00"
+                      required
+                    />
+                  </div>
+                  <div className="mb-3">
+                    <label className="form-label">Tipo</label>
+                    <select className="form-select" value={tipo} onChange={(e) => setTipo(e.target.value)}>
+                      <option value="RECEITA">Receita</option>
+                      <option value="DESPESA">Despesa</option>
+                    </select>
+                  </div>
+                  <div className="mb-3">
+                    <label className="form-label">Data</label>
+                    <input
+                      type="date"
+                      className="form-control"
+                      value={data}
+                      onChange={(e) => setData(e.target.value)}
+                      required
+                    />
+                  </div>
+                </div>
+                <div className="modal-footer border-secondary">
+                  <button type="button" className="btn btn-secondary" onClick={() => setExibirModal(false)}>
+                    Cancelar
+                  </button>
+                  <button type="submit" className="btn btn-primary" disabled={salvando}>
+                    {salvando ? 'Salvando...' : 'Salvar Transação'}
+                  </button>
+                </div>
+              </form>
             </div>
           </div>
         </div>
-      </main>
+      )}
     </div>
   );
 }
