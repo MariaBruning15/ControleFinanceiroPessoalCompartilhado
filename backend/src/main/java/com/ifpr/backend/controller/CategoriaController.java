@@ -1,27 +1,16 @@
 package com.ifpr.backend.controller;
 
-import java.util.List;
-import java.util.UUID;
-
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestHeader;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
-
 import com.ifpr.backend.dto.CategoriaRequestDTO;
 import com.ifpr.backend.model.Categoria;
 import com.ifpr.backend.model.enums.TipoTransacao;
 import com.ifpr.backend.service.CategoriaService;
-
 import jakarta.validation.Valid;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/v1/categories")
@@ -33,7 +22,6 @@ public class CategoriaController {
         this.categoriaService = categoriaService;
     }
 
-    // GET /api/v1/categories?type=INCOME ou ?type=EXPENSE
     @GetMapping
     public ResponseEntity<List<Categoria>> listarCategorias(
             @RequestHeader("X-Usuario-Id") UUID usuarioId,
@@ -46,7 +34,10 @@ public class CategoriaController {
     public ResponseEntity<Categoria> criarCategoria(
             @Valid @RequestBody CategoriaRequestDTO dto,
             @RequestHeader("X-Usuario-Id") UUID usuarioId) {
-        Categoria categoria = new Categoria(dto.getNome(), dto.getTipo(), null);
+        
+        TipoTransacao tipoEnum = TipoTransacao.valueOf(dto.getTipo());
+        Categoria categoria = new Categoria(dto.getNome(), tipoEnum, null);
+        
         Categoria salva = categoriaService.criarCategoria(categoria, usuarioId);
         return ResponseEntity.status(HttpStatus.CREATED).body(salva);
     }
@@ -56,7 +47,10 @@ public class CategoriaController {
             @PathVariable UUID id,
             @Valid @RequestBody CategoriaRequestDTO dto,
             @RequestHeader("X-Usuario-Id") UUID usuarioId) {
-        Categoria dados = new Categoria(dto.getNome(), dto.getTipo(), null);
+        
+        TipoTransacao tipoEnum = TipoTransacao.valueOf(dto.getTipo());
+        Categoria dados = new Categoria(dto.getNome(), tipoEnum, null);
+        
         Categoria atualizada = categoriaService.atualizarCategoria(id, dados, usuarioId);
         return ResponseEntity.ok(atualizada);
     }
