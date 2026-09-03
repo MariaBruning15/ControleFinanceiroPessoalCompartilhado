@@ -1,14 +1,20 @@
 package com.ifpr.backend.service;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.ifpr.backend.dto.DashboardSummaryDTO;
 import com.ifpr.backend.exception.ResourceNotFoundException;
 import com.ifpr.backend.model.Carteira;
 import com.ifpr.backend.model.Categoria;
@@ -108,5 +114,51 @@ public class TransacaoService {
                 .orElseThrow(() -> new ResourceNotFoundException("Transação não encontrada nesta carteira."));
 
         transacaoRepository.delete(transacao);
+    }
+
+    public DashboardSummaryDTO obterResumoDashboard(UUID carteiraId, UUID usuarioId, LocalDate startDate, LocalDate endDate) {
+        // Valida se o usuário é membro da carteira
+        carteiraService.validarMembro(carteiraId, usuarioId);
+
+        List<Transacao> transacoes = transacaoRepository.findTransacoesParaSummary(carteiraId, startDate, endDate);
+
+        BigDecimal totalIncome = BigDecimal.ZERO;
+        BigDecimal totalExpense = BigDecimal.ZERO;
+
+        Map<String, BigDecimal[]> monthlyMap = new TreeMap<>(); // "YYYY-MM" -> [income, expense]
+
+        DateTimeFormatter monthFormatter = DateTimeFormatter.ofPattern("yyyy-MM");
+
+        for (Transacao t : transacoes) {
+            BigDecimal valor = t.getValor() != null ? t.getValor() : BigDecimal.ZERO;
+            String monthKey = t.getData().format(monthFormatter);
+
+            monthlyMap.putIfAbsent(monthKey, new BigDecimal[]{BigDecimal.ZERO, BigDecimal.ZERO});
+
+            if (t.getTipo() == TipoTransacao.RECEITA) {
+                totalIncome = totalIncome.add(valor);
+                monthlyMap.get(monthKey)[0] = monthlyMap.get(monthKey)[0].add(valor);
+            } else if (t.getTipo() == TipoTransacao.DESPESA) {
+                totalExpense = totalExpense.add(valor);
+                monthlyMap.get(monthKey)[1] = monthlyMap.get(monthKey)[1].add(valor);
+            }
+        }
+
+        BigDecimal balance = totalIncome.subtract(totalExpense);
+        long transactionCount = transacoes.size();
+
+        // Obtém o resumo agrupado por categoria
+        List<DashboardSummaryDTO.CategorySummaryDTO> byCategory = 
+                transacaoRepository.findSummaryByCategory(carteiraId, startDate, endDate);
+
+        // Converte o mapa mensal em lista de DTOs
+        List<DashboardSummaryDTO.MonthlySummaryDTO> byMonth = monthlyMap.entrySet().stream()
+                .map(entry -> new DashboardSummaryDTO.MonthlySummaryDTO(
+                        entry.getKey(),
+                        entry.getValue()[0],
+                        entry.getValue()[1]))
+                .collect(Collectors.toList());
+
+        return new DashboardSummaryDTO(totalIncome, totalExpense, balance, transactionCount, byCategory, byMonth);
     }
 }
