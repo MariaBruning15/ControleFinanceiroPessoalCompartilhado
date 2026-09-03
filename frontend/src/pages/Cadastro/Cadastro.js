@@ -19,7 +19,7 @@ function Cadastro() {
     e.preventDefault();
     setErro('');
 
-    // Validação para checar se as senhas são iguais
+    // Validação local de confirmação de senha
     if (senha !== confirmarSenha) {
       setErro('As senhas não coincidem.');
       return;
@@ -28,16 +28,24 @@ function Cadastro() {
     setCarregando(true);
 
     try {
-      // Chama o serviço de cadastro herdado do BaseService
+      // Chama a API através do AuthService (herdado do BaseService)
       await authService.cadastrar(nome, email, senha);
       
-      // Redireciona para a tela de login após o cadastro com sucesso
+      // Redireciona para a tela de login após cadastro realizado com sucesso
       navigate('/');
     } catch (err) {
-      if (err.response && err.response.data && err.response.data.message) {
-        setErro(err.response.data.message);
+      if (err.response) {
+        // Trata retornos da API (Spring Boot)
+        const mensagemServidor = typeof err.response.data === 'string'
+          ? err.response.data
+          : err.response.data?.message;
+
+        setErro(mensagemServidor || 'Erro ao realizar o cadastro. Verifique os dados informados.');
+      } else if (err.request) {
+        // Ocorre quando a requisição foi feita mas não houve resposta do backend
+        setErro('Servidor indisponível. Verifique se a API está em execução.');
       } else {
-        setErro('Erro ao realizar o cadastro. Tente novamente.');
+        setErro('Erro ao processar requisição. Tente novamente.');
       }
     } finally {
       setCarregando(false);
