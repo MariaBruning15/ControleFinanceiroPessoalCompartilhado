@@ -7,51 +7,50 @@ import {
   TrendingUp, TrendingDown, DollarSign, LogOut, User, 
   LayoutDashboard, CreditCard, Tag, Settings 
 } from 'lucide-react';
+
+import transacaoService from '../../services/TransacaoService';
+import usuarioService from '../../services/UsuarioService';
+import authService from '../../services/AuthService';
 import './Dashboard.css';
-
-// Mock de dados do gráfico (últimos 6 meses)
-const MOCK_GRAFICO = [
-  { mes: 'Out', receitas: 3200, despesas: 1800 },
-  { mes: 'Nov', receitas: 4100, despesas: 2300 },
-  { mes: 'Dez', receitas: 5500, despesas: 3400 },
-  { mes: 'Jan', receitas: 3800, despesas: 2100 },
-  { mes: 'Fev', receitas: 4600, despesas: 2500 },
-  { mes: 'Mar', receitas: 5200, despesas: 2800 },
-];
-
-// Mock de lançamentos recentes
-const MOCK_TRANSACOES = [
-  { id: 1, descricao: 'Salário Mensal', valor: 4500.00, data: '05/03/2026', tipo: 'receita' },
-  { id: 2, descricao: 'Supermercado', valor: 650.40, data: '07/03/2026', tipo: 'despesa' },
-  { id: 3, descricao: 'Projeto Freelance', valor: 700.00, data: '10/03/2026', tipo: 'receita' },
-  { id: 4, descricao: 'Conta de Luz', valor: 180.20, data: '12/03/2026', tipo: 'despesa' },
-  { id: 5, descricao: 'Assinatura Streaming', valor: 45.90, data: '14/03/2026', tipo: 'despesa' },
-];
 
 function Dashboard() {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const [dadosGrafico, setDadosGrafico] = useState([]);
   const [transacoes, setTransacoes] = useState([]);
-  const [usuario, setUsuario] = useState({ nome: 'Usuário', email: 'usuario@email.com' });
+  const [usuario, setUsuario] = useState({ nome: 'Usuário', email: '' });
 
-  // Simula o carregamento dos dados (Loading com delay)
   useEffect(() => {
-    const timer = setTimeout(() => {
-      setDadosGrafico(MOCK_GRAFICO);
-      setTransacoes(MOCK_TRANSACOES);
-      setLoading(false);
-    }, 1200);
+    async function carregarDadosDashboard() {
+      try {
+        setLoading(true);
 
-    return () => clearTimeout(timer);
+        // Executa as chamadas à API em paralelo para otimizar o carregamento
+        const [resPerfil, resGrafico, resTransacoes] = await Promise.all([
+          usuarioService.buscarPerfil(),
+          transacaoService.buscarDadosGrafico(6),
+          transacaoService.buscarRecentes(5)
+        ]);
+
+        if (resPerfil?.data) setUsuario(resPerfil.data);
+        if (resGrafico?.data) setDadosGrafico(resGrafico.data);
+        if (resTransacoes?.data) setTransacoes(resTransacoes.data);
+      } catch (error) {
+        console.error('Erro ao carregar dados do dashboard:', error);
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    carregarDadosDashboard();
   }, []);
 
   const handleLogout = () => {
-    // Lógica de logout (limpar tokens, estados, etc)
+    authService.logout();
     navigate('/');
   };
 
-  // Cálculo dos indicadores
+  // Cálculo dinâmico dos indicadores baseado nas transações carregadas
   const totalReceitas = transacoes
     .filter(t => t.tipo === 'receita')
     .reduce((acc, curr) => acc + curr.valor, 0);
@@ -90,7 +89,7 @@ function Dashboard() {
           <button className="menu-item">
             <Tag size={20} /> Categorias
           </button>
-          <button className="menu-item">
+          <button className="menu-item" onClick={() => navigate('/alterar-senha')}>
             <Settings size={20} /> Configurações
           </button>
         </nav>
@@ -105,7 +104,7 @@ function Dashboard() {
               <User size={22} />
             </div>
             <div>
-              <span className="user-name">Olá, {usuario.nome}</span>
+              <span className="user-name">Olá, {usuario.nome || usuario.name}</span>
             </div>
           </div>
           <button className="btn-logout" onClick={handleLogout} title="Sair">
@@ -171,17 +170,21 @@ function Dashboard() {
             <div className="dashboard-card list-card">
               <h3>Lançamentos Recentes</h3>
               <div className="transactions-list">
-                {transacoes.map((t) => (
-                  <div key={t.id} className="transaction-item">
-                    <div className="t-info">
-                      <span className="t-title">{t.descricao}</span>
-                      <span className="t-date">{t.data}</span>
+                {transacoes.length === 0 ? (
+                  <p className="text-white-50 text-center my-auto">Nenhuma transação encontrada.</p>
+                ) : (
+                  transacoes.map((t) => (
+                    <div key={t.id} className="transaction-item">
+                      <div className="t-info">
+                        <span className="t-title">{t.descricao}</span>
+                        <span className="t-date">{t.data}</span>
+                      </div>
+                      <span className={`t-amount ${t.tipo}`}>
+                        {t.tipo === 'receita' ? '+' : '-'} R$ {Number(t.valor).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                      </span>
                     </div>
-                    <span className={`t-amount ${t.tipo}`}>
-                      {t.tipo === 'receita' ? '+' : '-'} R$ {t.valor.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
-                    </span>
-                  </div>
-                ))}
+                  ))
+                )}
               </div>
             </div>
           </div>
