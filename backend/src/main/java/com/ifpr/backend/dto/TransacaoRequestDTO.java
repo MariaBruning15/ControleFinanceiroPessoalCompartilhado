@@ -11,38 +11,32 @@ import jakarta.validation.constraints.Positive;
 
 public class TransacaoRequestDTO {
 
-    @NotNull(message = "A carteira é obrigatória.")
-    private UUID carteiraId;
-
-    private UUID categoriaId;
-
-    @NotNull(message = "O tipo da transação é obrigatório.")
-    private TipoTransacao tipo;
+    @NotNull(message = "O tipo da transação é obrigatório (INCOME ou EXPENSE).")
+    private TipoTransacao type;
 
     @NotNull(message = "O valor é obrigatório.")
-    @Positive(message = "O valor deve ser maior que zero.")
-    private BigDecimal valor;
+    @Positive(message = "O valor deve ser positivo.")
+    private BigDecimal amount;
 
-    private String descricao;
+    private String description;
 
     @NotNull(message = "A data da transação é obrigatória.")
-    private LocalDate data;
+    private LocalDate date;
 
-    public UUID getCarteiraId() { return carteiraId; }
-    public void setCarteiraId(UUID carteiraId) { this.carteiraId = carteiraId; }
+    private UUID categoryId;
 
-    public UUID getCategoriaId() { return categoriaId; }
-    public void setCategoriaId(UUID categoriaId) { this.categoriaId = categoriaId; }
+    public TipoTransacao getType() { return type; }
+    public void setType(TipoTransacao type) { this.type = type; }
 
-    public TipoTransacao getTipo() { return tipo; }
-    public void setTipo(TipoTransacao tipo) { this.tipo = tipo; }
+    public BigDecimal getAmount() { return amount; }
+    public void setAmount(BigDecimal amount) { this.amount = amount; }
 
-    public BigDecimal getValor() { return valor; }
-    public void setValor(BigDecimal valor) { this.valor = valor; }
+    public String getDescription() { return description; }
+    public void setDescription(String description) { this.description = description; }
 
-    public String getDescricao() { return descricao; }
-    public void setDescricao(String descricao) { this.descricao = descricao; }
+    public LocalDate getDate() { return date; }
+    public void setDate(LocalDate date) { this.date = date; }
 
-    public LocalDate getData() { return data; }
-    public void setData(LocalDate data) { this.data = data; }
+    public UUID getCategoryId() { return categoryId; }
+    public void setCategoryId(UUID categoryId) { this.categoryId = categoryId; }
 }

@@ -1,20 +1,33 @@
 package com.ifpr.backend.repository;
 
 import java.time.LocalDate;
-import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 import com.ifpr.backend.model.Transacao;
+import com.ifpr.backend.model.enums.TipoTransacao;
 
 public interface TransacaoRepository extends JpaRepository<Transacao, UUID> {
 
-    List<Transacao> findByCarteiraIdOrderByDataDesc(UUID carteiraId);
+    @Query("SELECT t FROM Transacao t WHERE t.carteira.id = :carteiraId " +
+           "AND (:tipo IS NULL OR t.tipo = :tipo) " +
+           "AND (:categoryId IS NULL OR t.categoria.id = :categoryId) " +
+           "AND (:startDate IS NULL OR t.data >= :startDate) " +
+           "AND (:endDate IS NULL OR t.data <= :endDate)")
+    Page<Transacao> findComFiltrosEPaginacao(@Param("carteiraId") UUID carteiraId,
+                                             @Param("tipo") TipoTransacao tipo,
+                                             @Param("categoryId") UUID categoryId,
+                                             @Param("startDate") LocalDate startDate,
+                                             @Param("endDate") LocalDate endDate,
+                                             Pageable pageable);
 
-    List<Transacao> findByCarteiraIdAndDataBetweenOrderByDataDesc(UUID carteiraId, LocalDate dataInicio, LocalDate dataFim);
-
-    List<Transacao> findByCarteiraIdAndCriadoPorId(UUID carteiraId, UUID usuarioId);
+    Optional<Transacao> findByIdAndCarteiraId(UUID id, UUID carteiraId);
 
     boolean existsByCategoriaId(UUID categoriaId);
 }
