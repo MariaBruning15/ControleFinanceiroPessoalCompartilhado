@@ -1,49 +1,60 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import CardComponent from '../../components/Card/Card';
+import usuarioService from '../../services/UsuarioService';
 import './AlterarSenha.css';
 
 function AlterarSenha() {
   const navigate = useNavigate();
 
-  // Estados dos campos
+  // Estados dos campos de formulário
   const [senhaAtual, setSenhaAtual] = useState('');
   const [novaSenha, setNovaSenha] = useState('');
   const [confirmarSenha, setConfirmarSenha] = useState('');
 
-  // Estados de feedback e erros
+  // Estados de erro, carregamento e sucesso
   const [erroGeral, setErroGeral] = useState('');
   const [erroSenhaAtual, setErroSenhaAtual] = useState('');
+  const [carregando, setCarregando] = useState(false);
   const [sucesso, setSucesso] = useState(false);
 
-  // Simulação da senha cadastrada no banco de dados para validação mock
-  const SENHA_MOCK_CORRETA = '123456';
-
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setErroGeral('');
     setErroSenhaAtual('');
 
-    // 1. Validação da Senha Atual
-    if (senhaAtual !== SENHA_MOCK_CORRETA) {
-      setErroSenhaAtual('A senha atual está incorreta.');
-      return;
-    }
-
-    // 2. Validação dos critérios de força da Nova Senha (mínimo 6 caracteres)
+    // 1. Validação de critérios da Nova Senha (mínimo 6 caracteres)
     if (novaSenha.length < 6) {
       setErroGeral('A nova senha deve conter no mínimo 6 caracteres.');
       return;
     }
 
-    // 3. Validação de coincidência entre as senhas
+    // 2. Validação de coincidência entre as senhas
     if (novaSenha !== confirmarSenha) {
       setErroGeral('A confirmação não coincide com a nova senha.');
       return;
     }
 
-    // Caso passem todas as validações:
-    setSucesso(true);
+    setCarregando(true);
+
+    try {
+      // Chama o método no UsuarioService estendido do BaseService
+      await usuarioService.alterarSenha(senhaAtual, novaSenha);
+      setSucesso(true);
+    } catch (err) {
+      if (err.response) {
+        // Se a API retornar erro de validação da senha atual (ex.: 400 Bad Request)
+        if (err.response.status === 400 && err.response.data?.message?.toLowerCase().includes('senha')) {
+          setErroSenhaAtual(err.response.data.message || 'A senha atual está incorreta.');
+        } else {
+          setErroGeral(err.response.data?.message || 'Erro ao alterar a senha. Tente novamente.');
+        }
+      } else {
+        setErroGeral('Não foi possível se conectar ao servidor.');
+      }
+    } finally {
+      setCarregando(false);
+    }
   };
 
   return (
@@ -56,7 +67,7 @@ function AlterarSenha() {
             </p>
             <button 
               className="btn btn-custom fs-5"
-              onClick={() => navigate('/app/dashboard')}
+              onClick={() => navigate('/dashboard')}
             >
               Voltar ao Dashboard
             </button>
@@ -128,11 +139,11 @@ function AlterarSenha() {
               </div>
             </div>
 
-            <button type="submit" className="btn btn-custom fs-5">
-              Salvar Senha
+            <button type="submit" className="btn btn-custom fs-5" disabled={carregando}>
+              {carregando ? 'Salvando...' : 'Salvar Senha'}
             </button>
 
-            <div className="cadastro">
+            <div className="cadastro mt-2">
               <button 
                 type="button" 
                 className="btn-link-style" 
