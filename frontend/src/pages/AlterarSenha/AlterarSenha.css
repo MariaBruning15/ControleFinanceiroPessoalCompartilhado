@@ -1,0 +1,36 @@
+@import '../../components/Card/Card.css';
+
+.alterar-senha-page .btn-custom {
+  width: 85% !important; 
+  margin: 0 auto !important; 
+}
+
+.alterar-senha-page {
+  display: flex;
+  justify-content: center; 
+  align-items: center;    
+  width: 100vw;
+  min-height: 100vh;
+  padding: 1rem;
+  box-sizing: border-box;
+}
+
+.alterar-senha-page .w-85 {
+  width: 85% !important;
+}
+
+/* Estilo para transformar botão em link de voltar/cancelar */
+.btn-link-style {
+  background: none;
+  border: none;
+  color: #9ec5fe !important;
+  font-size: 0.95rem;
+  font-weight: 500;
+  cursor: pointer;
+  padding: 0;
+}
+
+.btn-link-style:hover {
+  color: #ffffff !important;
+  text-decoration: underline !important;
+}

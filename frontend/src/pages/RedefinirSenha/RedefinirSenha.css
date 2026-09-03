@@ -1,0 +1,21 @@
+@import '../../components/Card/Card.css';
+
+/* Mantém o mesmo comportamento de largura e centralização do botão */
+.redefinir-senha-page .btn-custom {
+  width: 85% !important; 
+  margin: 0 auto !important; 
+}
+
+.redefinir-senha-page {
+  display: flex;
+  justify-content: center; 
+  align-items: center;    
+  width: 100vw;
+  min-height: 100vh;
+  padding: 1rem;
+  box-sizing: border-box;
+}
+
+.redefinir-senha-page .w-85 {
+  width: 85% !important;
+}

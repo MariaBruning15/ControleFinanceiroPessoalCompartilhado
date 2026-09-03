@@ -1,0 +1,16 @@
+@import '../../components/Card/Card.css';
+
+.recuperar-senha-page .btn-custom {
+  width: 85% !important; 
+  margin: 0 auto !important; 
+}
+.recuperar-senha-page,
+.redefinir-senha-page {
+    display: flex;
+    justify-content: center; 
+    align-items: center;    
+    width: 100vw;
+    min-height: 100vh;
+    padding: 1rem;
+    box-sizing: border-box;
+}

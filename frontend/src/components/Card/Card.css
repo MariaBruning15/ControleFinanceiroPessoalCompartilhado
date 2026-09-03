@@ -1,0 +1,114 @@
+.card-container {
+  width: 100vw;
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 1rem;
+  box-sizing: border-box;
+}
+
+.card-container .card {
+  background-color: rgba(255, 255, 255, 0.08) !important;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2) !important;
+  border-radius: 20px !important;
+  padding: 2.5rem 2rem !important;
+  width: 100%;
+  max-width: 400px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  box-shadow: 0 0.5rem 1.5rem rgba(0, 0, 0, 0.3);
+}
+
+.card-title { 
+  color: #ffffff !important;
+  font-size: 2.2rem !important;
+  font-weight: 700;
+  margin-bottom: 1.5rem;
+  text-align: center;
+}
+
+.card-subtitle {
+  color: #ffffff !important;
+  font-size: 1.3rem !important;
+  font-weight: 400;
+  margin-bottom: 4rem;
+  text-align: center;
+}
+
+.card-content {
+  width: 100%;
+}
+
+.inputs {
+  width: 100%;
+  margin-bottom: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+
+.cadastro {
+  margin-top: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.3rem;
+}
+
+.cadastro p {
+  color: #ffffff !important;
+  margin: 0;
+}
+
+.card a {
+  color: #9ec5fe !important;
+  font-size: 0.95rem;
+  font-weight: 500;
+  text-decoration: none !important;
+}
+
+.card a:hover {
+  color: #ffffff !important;
+  text-decoration: underline !important;
+}
+
+.card-container .btn-custom {
+  background-color: #ffffff !important;
+  color: #202b53 !important;
+  border: none !important;
+  padding: 0.6rem 2rem !important;
+  border-radius: 50px !important;
+  font-weight: 600 !important;
+  width: 50% !important;
+}
+
+.card-container .btn-custom:hover {
+  background-color: #e2e8f0 !important;
+}
+
+.form-floating {
+  display: flex !important;
+  justify-content: center !important;
+  width: 100% !important;
+}
+
+.form-control {
+  width: 100% !important;
+  background-color: rgba(255, 255, 255, 0.9) !important;
+  border-radius: 10px !important;
+}
+
+.form-control:focus {
+  background-color: #ffffff !important;
+  box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.3) !important;
+}
+
+.form-floating label {
+  color: #555555 !important;
+}
