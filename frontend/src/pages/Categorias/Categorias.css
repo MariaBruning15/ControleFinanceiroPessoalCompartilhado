@@ -1,1 +1,3 @@
-
+.rounded-circle{
+  background-color: var(--primary-color)!important;
+}
