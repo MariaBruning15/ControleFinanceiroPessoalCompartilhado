@@ -87,6 +87,7 @@ function Categorias() {
           <button className="btn btn-outline-light text-start w-100" onClick={() => navigate('/dashboard')}>Dashboard</button>
           <button className="btn btn-outline-light text-start w-100" onClick={() => navigate('/dashboard')}>Transações</button>
           <button className="btn btn-primary text-start w-100">Categorias</button>
+          <button className="btn btn-outline-light text-start w-100" onClick={() => navigate('/carteiras')}>Carteiras</button>
           <button className="btn btn-outline-light text-start w-100">Perfil</button>
         </nav>
       </aside>
@@ -97,7 +98,7 @@ function Categorias() {
           <h4 className="m-0">Categorias</h4>
           <div className="d-flex align-items-center gap-3">
             <div className="d-flex align-items-center gap-2">
-              <div className="rounded-circle text-white d-flex align-items-center justify-content-center fw-bold" style={{ width: '38px', height: '38px' }}>
+              <div className="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center fw-bold" style={{ width: '38px', height: '38px' }}>
                 {usuarioInicial}
               </div>
               <span>{usuarioNome}</span>

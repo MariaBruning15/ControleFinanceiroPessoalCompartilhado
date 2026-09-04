@@ -245,11 +245,12 @@ function Dashboard() {
     <div className="d-flex text-white min-vh-100" style={{ backgroundColor: '#1a1f36' }}>
       
       <aside className="p-3 border-end border-secondary d-flex flex-column" style={{ width: '240px', backgroundColor: '#141824' }}>
-        <h3 className="titulo text-white font-weight-bold mb-4">Mercúrio</h3>
+        <h3 className="text-primary font-weight-bold mb-4">Mercúrio</h3>
         <nav className="nav flex-column gap-2">
           <button className="btn btn-primary text-start w-100">Dashboard</button>
           <button className="btn btn-outline-light text-start w-100">Transações</button>
           <button className="btn btn-outline-light text-start w-100" onClick={() => navigate('/categorias')}>Categorias</button>
+          <button className="btn btn-outline-light text-start w-100" onClick={() => navigate('/carteiras')}>Carteiras</button>
           <button className="btn btn-outline-light text-start w-100">Perfil</button>
         </nav>
       </aside>
@@ -263,7 +264,7 @@ function Dashboard() {
               + Nova Transação
             </button>
             <div className="d-flex align-items-center gap-2">
-              <div className="rounded-circle d-flex align-items-center justify-content-center fw-bold" style={{ width: '38px', height: '38px' }}>
+              <div className="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center fw-bold" style={{ width: '38px', height: '38px' }}>
                 {usuarioInicial}
               </div>
               <span>{usuarioNome}</span>
@@ -285,19 +286,19 @@ function Dashboard() {
               <div className="row mb-4">
                 <div className="col-md-4 mb-3">
                   <div className="card text-white p-3 border-0" style={{ backgroundColor: '#232943' }}>
-                    <small className="text-white">Saldo Atual</small>
+                    <small className="text-muted">Saldo Atual</small>
                     <h3 className="text-primary mt-2">R$ {resumo.saldoTotal.toFixed(2)}</h3>
                   </div>
                 </div>
                 <div className="col-md-4 mb-3">
                   <div className="card text-white p-3 border-0" style={{ backgroundColor: '#232943' }}>
-                    <small className="text-white">Receitas (Período)</small>
+                    <small className="text-muted">Receitas (Período)</small>
                     <h3 className="text-success mt-2">R$ {resumo.totalReceitas.toFixed(2)}</h3>
                   </div>
                 </div>
                 <div className="col-md-4 mb-3">
                   <div className="card text-white p-3 border-0" style={{ backgroundColor: '#232943' }}>
-                    <small className="text-white">Despesas (Período)</small>
+                    <small className="text-muted">Despesas (Período)</small>
                     <h3 className="text-danger mt-2">R$ {resumo.totalDespesas.toFixed(2)}</h3>
                   </div>
                 </div>

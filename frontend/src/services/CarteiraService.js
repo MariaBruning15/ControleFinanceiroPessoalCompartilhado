@@ -12,6 +12,10 @@ class CarteiraService extends BaseService {
   async criar(dados) {
     return await this.api.post(this.endPoint, dados);
   }
+
+  async remover(id) {
+    return await this.api.delete(`${this.endPoint}/${id}`);
+  }
 }
 
 export default new CarteiraService();
