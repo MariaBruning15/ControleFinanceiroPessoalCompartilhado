@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.ifpr.backend.dto.UsuarioRequestDTO;
 import com.ifpr.backend.dto.UsuarioResponseDTO;
+import com.ifpr.backend.exception.SenhaIncorretaException;
 import com.ifpr.backend.model.Usuario;
 import com.ifpr.backend.service.UsuarioService;
 
@@ -35,7 +36,13 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<?> login(@RequestBody Usuario usuario) {
-        return ResponseEntity.ok().build();
+    public ResponseEntity<UsuarioResponseDTO> login(@RequestBody Usuario usuario) {
+        Usuario encontrado = usuarioService.buscarPorEmail(usuario.getEmail());
+
+        if (!encontrado.getSenha().equals(usuario.getSenha())) {
+            throw new SenhaIncorretaException("E-mail ou senha inválidos.");
+        }
+
+        return ResponseEntity.ok(new UsuarioResponseDTO(encontrado));
     }
 }
