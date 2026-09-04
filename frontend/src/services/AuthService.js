@@ -7,8 +7,9 @@ class AuthService extends BaseService {
 
   async login(email, senha) {
     const resposta = await this.api.post(`${this.endPoint}/login`, { email, senha });
-    if (resposta.data && resposta.data.accessToken) {
-      localStorage.setItem('token', resposta.data.accessToken);
+    if (resposta.data && resposta.data.id) {
+      localStorage.setItem('usuarioId', resposta.data.id);
+      localStorage.setItem('usuarioNome', resposta.data.nome);
     }
     return resposta;
   }

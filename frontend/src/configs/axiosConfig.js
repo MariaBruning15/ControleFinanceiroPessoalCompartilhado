@@ -9,10 +9,14 @@ export const api = axios.create({
 
 api.interceptors.request.use(
   (config) => {
-    const token = localStorage.getItem('token'); 
+    const token = localStorage.getItem('token');
+    const usuarioId = localStorage.getItem('usuarioId');
 
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
+    }
+    if (usuarioId) {
+      config.headers['X-Usuario-Id'] = usuarioId;
     }
     return config;
   },
