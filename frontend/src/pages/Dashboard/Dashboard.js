@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import transacaoService from '../../services/TransacaoService';
+import categoriaService from '../../services/CategoriaService';
 import './Dashboard.css';
 
 import {
@@ -49,11 +50,33 @@ function Dashboard() {
   const [valor, setValor] = useState('');
   const [tipo, setTipo] = useState('RECEITA');
   const [data, setData] = useState(new Date().toISOString().split('T')[0]);
+  const [categorias, setCategorias] = useState([]);
+  const [categoriaId, setCategoriaId] = useState('');
   const [salvando, setSalvando] = useState(false);
 
   useEffect(() => {
     carregarDadosDashboard();
   }, []);
+
+  useEffect(() => {
+    if (exibirModal) {
+      carregarCategorias(tipo);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [exibirModal, tipo]);
+
+  const carregarCategorias = async (tipoSelecionado) => {
+    try {
+      const resp = await categoriaService.listar(tipoSelecionado);
+      const lista = Array.isArray(resp?.data) ? resp.data : [];
+      setCategorias(lista);
+      // Mantém a categoria selecionada só se ela ainda existir na nova lista (ex: ao trocar o tipo)
+      setCategoriaId((atual) => (lista.some((c) => c.id === atual) ? atual : ''));
+    } catch (erro) {
+      console.error('Erro ao carregar categorias:', erro);
+      setCategorias([]);
+    }
+  };
 
   const carregarDadosDashboard = async () => {
     try {
@@ -116,23 +139,36 @@ function Dashboard() {
     try {
       setSalvando(true);
 
+      if (!categoriaId) {
+        alert('Selecione uma categoria para a transação.');
+        setSalvando(false);
+        return;
+      }
+
       const payload = {
         descricao,
         valor: parseFloat(valor),
         tipo, // 'RECEITA' ou 'DESPESA'
         data,
+        categoriaId,
       };
 
       await transacaoService.criarTransacao(WALLET_ID, payload);
 
       setDescricao('');
       setValor('');
+      setCategoriaId('');
       setExibirModal(false);
 
       await carregarDadosDashboard();
     } catch (erro) {
-      console.error('Erro ao salvar transação:', erro.response?.data || erro.message);
-      alert('Erro ao salvar a transação. Verifique se os dados estão corretos.');
+      const dadosErro = erro.response?.data;
+      console.error('Erro ao salvar transação:', dadosErro || erro.message);
+
+      const mensagem = dadosErro?.message
+        ? `Erro ao salvar a transação: ${dadosErro.message}`
+        : 'Erro ao salvar a transação. Verifique se os dados estão corretos.';
+      alert(mensagem);
     } finally {
       setSalvando(false);
     }
@@ -172,7 +208,7 @@ function Dashboard() {
         <nav className="nav flex-column gap-2">
           <button className="btn btn-primary text-start w-100">Dashboard</button>
           <button className="btn btn-outline-light text-start w-100">Transações</button>
-          <button className="btn btn-outline-light text-start w-100">Categorias</button>
+          <button className="btn btn-outline-light text-start w-100" onClick={() => navigate('/categorias')}>Categorias</button>
           <button className="btn btn-outline-light text-start w-100">Perfil</button>
         </nav>
       </aside>
@@ -307,6 +343,28 @@ function Dashboard() {
                       <option value="RECEITA">Receita</option>
                       <option value="DESPESA">Despesa</option>
                     </select>
+                  </div>
+                  <div className="mb-3">
+                    <label className="form-label">Categoria</label>
+                    <select
+                      className="form-select"
+                      value={categoriaId}
+                      onChange={(e) => setCategoriaId(e.target.value)}
+                      required
+                    >
+                      <option value="">Selecione uma categoria</option>
+                      {categorias.map((cat) => (
+                        <option key={cat.id} value={cat.id}>
+                          {cat.nome}
+                        </option>
+                      ))}
+                    </select>
+                    {categorias.length === 0 && (
+                      <small className="text-muted d-block mt-1">
+                        Nenhuma categoria cadastrada para esse tipo.{' '}
+                        <a href="/categorias" className="text-primary">Cadastre uma aqui</a> antes de lançar a transação.
+                      </small>
+                    )}
                   </div>
                   <div className="mb-3">
                     <label className="form-label">Data</label>
