@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import transacaoService from '../../services/TransacaoService';
 import categoriaService from '../../services/CategoriaService';
+import carteiraService from '../../services/CarteiraService';
 import './Dashboard.css';
 
 import {
@@ -27,9 +28,11 @@ ChartJS.register(
 function Dashboard() {
   const navigate = useNavigate();
 
-  const WALLET_ID = localStorage.getItem('carteiraId') || '123e4567-e89b-12d3-a456-426614174000';
   const usuarioNome = localStorage.getItem('usuarioNome') || 'Usuário';
   const usuarioInicial = usuarioNome.charAt(0).toUpperCase();
+
+  const [walletId, setWalletId] = useState(null);
+  const [erroCarteira, setErroCarteira] = useState('');
 
   const [resumo, setResumo] = useState({
     saldoTotal: 0,
@@ -55,8 +58,46 @@ function Dashboard() {
   const [salvando, setSalvando] = useState(false);
 
   useEffect(() => {
-    carregarDadosDashboard();
+    resolverCarteira();
   }, []);
+
+  useEffect(() => {
+    if (walletId) {
+      carregarDadosDashboard(walletId);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [walletId]);
+
+  // Busca as carteiras do usuário logado; se ele ainda não tiver nenhuma,
+  // cria uma carteira padrão automaticamente (evita usar um ID fixo/inexistente).
+  const resolverCarteira = async () => {
+    try {
+      setCarregando(true);
+      const resp = await carteiraService.listar();
+      const carteiras = Array.isArray(resp?.data) ? resp.data : [];
+
+      const carteiraSalva = localStorage.getItem('carteiraId');
+      const carteiraValida = carteiras.find((c) => c.id === carteiraSalva);
+
+      let carteiraEscolhida = carteiraValida || carteiras[0];
+
+      if (!carteiraEscolhida) {
+        const criada = await carteiraService.criar({
+          nome: 'Minha Carteira',
+          descricao: 'Carteira criada automaticamente',
+          saldoInicial: 0,
+        });
+        carteiraEscolhida = criada.data;
+      }
+
+      localStorage.setItem('carteiraId', carteiraEscolhida.id);
+      setWalletId(carteiraEscolhida.id);
+    } catch (erro) {
+      console.error('Erro ao carregar carteiras do usuário:', erro);
+      setErroCarteira('Não foi possível carregar sua carteira. Tente sair e entrar novamente.');
+      setCarregando(false);
+    }
+  };
 
   useEffect(() => {
     if (exibirModal) {
@@ -78,13 +119,13 @@ function Dashboard() {
     }
   };
 
-  const carregarDadosDashboard = async () => {
+  const carregarDadosDashboard = async (walletIdAtual) => {
     try {
       setCarregando(true);
 
       const [summaryResp, recentesResp] = await Promise.all([
-        transacaoService.obterResumoDashboard(WALLET_ID),
-        transacaoService.listarRecentes(WALLET_ID, 0, 5),
+        transacaoService.obterResumoDashboard(walletIdAtual),
+        transacaoService.listarRecentes(walletIdAtual, 0, 5),
       ]);
 
       if (summaryResp?.data) {
@@ -153,14 +194,14 @@ function Dashboard() {
         categoriaId,
       };
 
-      await transacaoService.criarTransacao(WALLET_ID, payload);
+      await transacaoService.criarTransacao(walletId, payload);
 
       setDescricao('');
       setValor('');
       setCategoriaId('');
       setExibirModal(false);
 
-      await carregarDadosDashboard();
+      await carregarDadosDashboard(walletId);
     } catch (erro) {
       const dadosErro = erro.response?.data;
       console.error('Erro ao salvar transação:', dadosErro || erro.message);
@@ -218,7 +259,7 @@ function Dashboard() {
         <header className="p-3 border-bottom border-secondary d-flex justify-content-between align-items-center" style={{ backgroundColor: '#141824' }}>
           <h4 className="m-0">Resumo Financeiro</h4>
           <div className="d-flex align-items-center gap-3">
-            <button className="btn btn-primary me-2" onClick={() => setExibirModal(true)}>
+            <button className="btn btn-primary me-2" onClick={() => setExibirModal(true)} disabled={!walletId}>
               + Nova Transação
             </button>
             <div className="d-flex align-items-center gap-2">
@@ -232,7 +273,9 @@ function Dashboard() {
         </header>
 
         <div className="p-4 flex-grow-1">
-          {carregando ? (
+          {erroCarteira ? (
+            <div className="alert alert-danger">{erroCarteira}</div>
+          ) : carregando ? (
             <div className="d-flex flex-column align-items-center justify-content-center h-100 py-5">
               <div className="spinner-border text-primary mb-3" role="status"></div>
               <p>Carregando informações financeiras...</p>
