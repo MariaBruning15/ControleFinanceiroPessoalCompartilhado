@@ -28,3 +28,15 @@ html, body, #root {
   background: var(--bg);
 }
 
+.btn-primary {
+  --bs-btn-bg: var(--secondary-color);
+  --bs-btn-border-color: var(--secondary-color);
+  --bs-btn-hover-bg: #324179;
+  --bs-btn-hover-border-color: #2c3a6b;
+  --bs-btn-active-bg: #2c3a6b;
+  --bs-btn-active-border-color: #26315e;
+  --bs-btn-disabled-bg: var(--secondary-color);
+  --bs-btn-disabled-border-color: var(--secondary-color);
+  --bs-btn-focus-shadow-rgb: 59, 77, 142;
+}
+
