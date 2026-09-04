@@ -147,14 +147,14 @@ function Categorias() {
                     <p>Carregando categorias...</p>
                   </div>
                 ) : categorias.length === 0 ? (
-                  <p className="text-muted text-center py-4">Nenhuma categoria cadastrada ainda.</p>
+                  <p className="text-white text-center py-4">Nenhuma categoria cadastrada ainda.</p>
                 ) : (
                   <div className="row">
                     <div className="col-md-6">
                       <h6 className="text-success">Receitas</h6>
                       <ul className="list-group list-group-flush mb-3">
                         {categoriasReceita.length === 0 && (
-                          <li className="list-group-item bg-transparent text-muted border-secondary px-0">Nenhuma</li>
+                          <li className="list-group-item bg-transparent text-white border-secondary px-0">Nenhuma</li>
                         )}
                         {categoriasReceita.map((cat) => (
                           <li key={cat.id} className="list-group-item bg-transparent text-white d-flex justify-content-between align-items-center border-secondary px-0">
@@ -170,7 +170,7 @@ function Categorias() {
                       <h6 className="text-danger">Despesas</h6>
                       <ul className="list-group list-group-flush mb-3">
                         {categoriasDespesa.length === 0 && (
-                          <li className="list-group-item bg-transparent text-muted border-secondary px-0">Nenhuma</li>
+                          <li className="list-group-item bg-transparent text-white border-secondary px-0">Nenhuma</li>
                         )}
                         {categoriasDespesa.map((cat) => (
                           <li key={cat.id} className="list-group-item bg-transparent text-white d-flex justify-content-between align-items-center border-secondary px-0">

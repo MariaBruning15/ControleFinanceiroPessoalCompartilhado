@@ -180,7 +180,7 @@ function Carteiras() {
                     <p>Carregando carteiras...</p>
                   </div>
                 ) : carteiras.length === 0 ? (
-                  <p className="text-muted text-center py-4">Nenhuma carteira cadastrada ainda. Crie a primeira ao lado.</p>
+                  <p className="text-white text-center py-4">Nenhuma carteira cadastrada ainda. Crie a primeira ao lado.</p>
                 ) : (
                   <ul className="list-group list-group-flush">
                     {carteiras.map((cart) => {

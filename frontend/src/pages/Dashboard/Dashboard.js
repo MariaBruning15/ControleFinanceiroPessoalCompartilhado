@@ -312,7 +312,7 @@ function Dashboard() {
                       {dadosGrafico.labels.length > 0 ? (
                         <Bar data={dadosGrafico} options={opcoesGrafico} />
                       ) : (
-                        <div className="d-flex h-100 align-items-center justify-content-center text-muted">
+                        <div className="d-flex h-100 align-items-center justify-content-center text-white">
                           Nenhum lançamento encontrado para montar o gráfico.
                         </div>
                       )}
@@ -338,7 +338,7 @@ function Dashboard() {
                         ))}
                       </ul>
                     ) : (
-                      <p className="text-muted my-auto text-center py-4">Nenhuma transação cadastrada.</p>
+                      <p className="text-white my-auto text-center py-4">Nenhuma transação cadastrada.</p>
                     )}
                   </div>
                 </div>
