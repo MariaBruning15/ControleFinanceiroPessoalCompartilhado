@@ -236,3 +236,7 @@
   border-color: white!important;
   color: var(--secondary-color)!important;
 }
+
+.rounded-circle{
+  background-color: var(--primary-color)!important;
+}

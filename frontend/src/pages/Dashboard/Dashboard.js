@@ -245,7 +245,7 @@ function Dashboard() {
     <div className="d-flex text-white min-vh-100" style={{ backgroundColor: '#1a1f36' }}>
       
       <aside className="p-3 border-end border-secondary d-flex flex-column" style={{ width: '240px', backgroundColor: '#141824' }}>
-        <h3 className="text-primary font-weight-bold mb-4">Mercúrio</h3>
+        <h3 className="titulo text-white font-weight-bold mb-4">Mercúrio</h3>
         <nav className="nav flex-column gap-2">
           <button className="btn btn-primary text-start w-100">Dashboard</button>
           <button className="btn btn-outline-light text-start w-100">Transações</button>
@@ -263,7 +263,7 @@ function Dashboard() {
               + Nova Transação
             </button>
             <div className="d-flex align-items-center gap-2">
-              <div className="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center fw-bold" style={{ width: '38px', height: '38px' }}>
+              <div className="rounded-circle d-flex align-items-center justify-content-center fw-bold" style={{ width: '38px', height: '38px' }}>
                 {usuarioInicial}
               </div>
               <span>{usuarioNome}</span>
