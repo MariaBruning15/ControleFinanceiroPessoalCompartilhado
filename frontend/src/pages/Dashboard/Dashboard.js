@@ -264,7 +264,7 @@ function Dashboard() {
               + Nova Transação
             </button>
             <div className="d-flex align-items-center gap-2">
-              <div className="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center fw-bold" style={{ width: '38px', height: '38px' }}>
+              <div className="rounded-circle text-white d-flex align-items-center justify-content-center fw-bold" style={{ width: '38px', height: '38px' }}>
                 {usuarioInicial}
               </div>
               <span>{usuarioNome}</span>
@@ -286,19 +286,19 @@ function Dashboard() {
               <div className="row mb-4">
                 <div className="col-md-4 mb-3">
                   <div className="card text-white p-3 border-0" style={{ backgroundColor: '#232943' }}>
-                    <small className="text-muted">Saldo Atual</small>
+                    <small className="text-white">Saldo Atual</small>
                     <h3 className="text-primary mt-2">R$ {resumo.saldoTotal.toFixed(2)}</h3>
                   </div>
                 </div>
                 <div className="col-md-4 mb-3">
                   <div className="card text-white p-3 border-0" style={{ backgroundColor: '#232943' }}>
-                    <small className="text-muted">Receitas (Período)</small>
+                    <small className="text-white">Receitas (Período)</small>
                     <h3 className="text-success mt-2">R$ {resumo.totalReceitas.toFixed(2)}</h3>
                   </div>
                 </div>
                 <div className="col-md-4 mb-3">
                   <div className="card text-white p-3 border-0" style={{ backgroundColor: '#232943' }}>
-                    <small className="text-muted">Despesas (Período)</small>
+                    <small className="text-white">Despesas (Período)</small>
                     <h3 className="text-danger mt-2">R$ {resumo.totalDespesas.toFixed(2)}</h3>
                   </div>
                 </div>

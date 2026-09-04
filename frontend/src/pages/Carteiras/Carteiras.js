@@ -195,8 +195,8 @@ function Carteiras() {
                               {cart.nome}{' '}
                               {ativa && <span className="badge bg-success ms-1">Ativa</span>}
                             </div>
-                            {cart.descricao && <small className="text-muted d-block">{cart.descricao}</small>}
-                            <small className="text-muted">Saldo inicial: R$ {Number(cart.saldoInicial || 0).toFixed(2)}</small>
+                            {cart.descricao && <small className="text-white d-block">{cart.descricao}</small>}
+                            <small className="text-white">Saldo inicial: R$ {Number(cart.saldoInicial || 0).toFixed(2)}</small>
                           </div>
                           <div className="d-flex gap-2">
                             {!ativa && (

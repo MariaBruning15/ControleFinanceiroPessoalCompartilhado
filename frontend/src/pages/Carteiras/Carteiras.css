@@ -1,1 +1,15 @@
 
+.btn-primary{
+  background-color: var(--secondary-color)!important;
+  border-color: var(--secondary-color)!important;
+}
+
+.btn-primary:hover{
+  background-color: white!important;
+  border-color: white!important;
+  color: var(--secondary-color)!important;
+}
+
+.rounded-circle {
+  background-color: var(--primary-color)!important;
+}
