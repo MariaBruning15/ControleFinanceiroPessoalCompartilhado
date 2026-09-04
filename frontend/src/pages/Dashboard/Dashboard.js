@@ -285,19 +285,19 @@ function Dashboard() {
               <div className="row mb-4">
                 <div className="col-md-4 mb-3">
                   <div className="card text-white p-3 border-0" style={{ backgroundColor: '#232943' }}>
-                    <small className="text-muted">Saldo Atual</small>
+                    <small className="text-white">Saldo Atual</small>
                     <h3 className="text-primary mt-2">R$ {resumo.saldoTotal.toFixed(2)}</h3>
                   </div>
                 </div>
                 <div className="col-md-4 mb-3">
                   <div className="card text-white p-3 border-0" style={{ backgroundColor: '#232943' }}>
-                    <small className="text-muted">Receitas (Período)</small>
+                    <small className="text-white">Receitas (Período)</small>
                     <h3 className="text-success mt-2">R$ {resumo.totalReceitas.toFixed(2)}</h3>
                   </div>
                 </div>
                 <div className="col-md-4 mb-3">
                   <div className="card text-white p-3 border-0" style={{ backgroundColor: '#232943' }}>
-                    <small className="text-muted">Despesas (Período)</small>
+                    <small className="text-white">Despesas (Período)</small>
                     <h3 className="text-danger mt-2">R$ {resumo.totalDespesas.toFixed(2)}</h3>
                   </div>
                 </div>
@@ -328,7 +328,7 @@ function Dashboard() {
                           <li key={item.id || idx} className="list-group-item bg-transparent text-white d-flex justify-content-between border-secondary px-0">
                             <div>
                               <div className="fw-bold">{item.descricao}</div>
-                              <small className="text-muted">{item.data}</small>
+                              <small className="text-white">{item.data}</small>
                             </div>
                             <span className={item.tipo === 'RECEITA' ? 'text-success fw-bold' : 'text-danger fw-bold'}>
                               {item.tipo === 'RECEITA' ? '+' : '-'} R$ {item.valor?.toFixed(2)}
@@ -337,7 +337,7 @@ function Dashboard() {
                         ))}
                       </ul>
                     ) : (
-                      <p className="text-muted my-auto text-center py-4">Nenhuma transação cadastrada.</p>
+                      <p className="text-white my-auto text-center py-4">Nenhuma transação cadastrada.</p>
                     )}
                   </div>
                 </div>
@@ -403,7 +403,7 @@ function Dashboard() {
                       ))}
                     </select>
                     {categorias.length === 0 && (
-                      <small className="text-muted d-block mt-1">
+                      <small className="text-white d-block mt-1">
                         Nenhuma categoria cadastrada para esse tipo.{' '}
                         <a href="/categorias" className="text-primary">Cadastre uma aqui</a> antes de lançar a transação.
                       </small>
