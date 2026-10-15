@@ -24,6 +24,7 @@ function App() {
         <Route path="/categorias" element={<Categorias />} />
         <Route path="/carteiras" element={<Carteiras />} />
         <Route path="/app/perfil/senha" element={<PrivateRoute><AlterarSenha /></PrivateRoute>} />
+        <Route path="/redefinir-senha/:token" element={<RedefinirSenha />} />
       </Routes>
     </BrowserRouter>
   );
