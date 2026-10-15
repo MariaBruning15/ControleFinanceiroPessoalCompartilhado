@@ -11,12 +11,12 @@ class UsuarioService extends BaseService {
   }
 
   async solicitarRecuperacaoSenha(email) {
-    const resposta = await this.api.post(`${this.endPoint}/esqueci-senha`, { email });
+    const resposta = await this.api.post('/senha/esqueci-senha', { email });
     return resposta;
   }
 
   async redefinirSenha(token, novaSenha) {
-    const resposta = await this.api.post(`${this.endPoint}/redefinir-senha`, {
+    const resposta = await this.api.post('/senha/redefinir', {
       token,
       novaSenha
     });
@@ -24,9 +24,9 @@ class UsuarioService extends BaseService {
   }
 
   async alterarSenha(senhaAtual, novaSenha) {
-    const resposta = await this.api.put(`${this.endPoint}/alterar-senha`, {
-      senhaAtual,
-      novaSenha
+    const resposta = await this.api.patch(`${this.endPoint}/me/password`, {
+      currentPassword: senhaAtual,
+      newPassword: novaSenha
     });
     return resposta;
   }
