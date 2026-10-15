@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.ifpr.backend.dto.EsqueciSenhaRequestDTO;
 import com.ifpr.backend.dto.RedefinirSenhaRequestDTO;
 import com.ifpr.backend.model.TokenRedefinicaoSenha;
+import com.ifpr.backend.service.EmailService;
 import com.ifpr.backend.service.TokenRedefinicaoSenhaService;
 
 import jakarta.validation.Valid;
@@ -18,17 +19,19 @@ import jakarta.validation.Valid;
 public class SenhaController {
 
     private final TokenRedefinicaoSenhaService tokenService;
+    private final EmailService emailService;
 
-    public SenhaController(TokenRedefinicaoSenhaService tokenService) {
-        this.tokenService = tokenService;
+    public SenhaController(TokenRedefinicaoSenhaService tokenService, EmailService emailService) {
+         this.tokenService = tokenService;
+        this.emailService = emailService;
     }
 
     @PostMapping("/esqueci-senha")
-    public ResponseEntity<String> solicitarRecuperacao(@Valid @RequestBody EsqueciSenhaRequestDTO dto) {
-        TokenRedefinicaoSenha token = tokenService.criarTokenRecuperacao(dto.getEmail());
-        // Em produção enviaria um e-mail. Para fins do projeto, é retornado o token na resposta.
-        return ResponseEntity.ok("Token de redefinição gerado com sucesso: " + token.getToken());
-    }
+public ResponseEntity<String> solicitarRecuperacao(@Valid @RequestBody EsqueciSenhaRequestDTO dto) {
+    TokenRedefinicaoSenha token = tokenService.criarTokenRecuperacao(dto.getEmail());
+    emailService.enviarRecuperacaoSenha(dto.getEmail(), token.getToken());
+    return ResponseEntity.ok("Se o e-mail estiver cadastrado, você receberá as instruções.");
+}
 
     @PostMapping("/redefinir")
     public ResponseEntity<String> redefinirSenha(@Valid @RequestBody RedefinirSenhaRequestDTO dto) {
