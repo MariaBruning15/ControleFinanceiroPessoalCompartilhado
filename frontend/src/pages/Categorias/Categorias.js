@@ -103,7 +103,7 @@ function Categorias() {
               </div>
               <span>{usuarioNome}</span>
             </div>
-            <button className="btn btn-outline-danger btn-sm" onClick={handleLogout}>Sair</button>
+            <button className="btn btn-danger btn-sm" onClick={handleLogout}>Sair</button>
           </div>
         </header>
 
@@ -159,7 +159,7 @@ function Categorias() {
                         {categoriasReceita.map((cat) => (
                           <li key={cat.id} className="list-group-item bg-transparent text-white d-flex justify-content-between align-items-center border-secondary px-0">
                             {cat.nome}
-                            <button className="btn btn-sm btn-outline-danger" onClick={() => handleRemoverCategoria(cat)}>
+                            <button className="btn btn-sm btn-danger" onClick={() => handleRemoverCategoria(cat)}>
                               Remover
                             </button>
                           </li>
@@ -175,7 +175,7 @@ function Categorias() {
                         {categoriasDespesa.map((cat) => (
                           <li key={cat.id} className="list-group-item bg-transparent text-white d-flex justify-content-between align-items-center border-secondary px-0">
                             {cat.nome}
-                            <button className="btn btn-sm btn-outline-danger" onClick={() => handleRemoverCategoria(cat)}>
+                            <button className="btn btn-sm btn-danger" onClick={() => handleRemoverCategoria(cat)}>
                               Remover
                             </button>
                           </li>

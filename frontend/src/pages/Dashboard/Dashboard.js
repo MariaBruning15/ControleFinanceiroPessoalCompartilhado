@@ -269,7 +269,7 @@ function Dashboard() {
               </div>
               <span>{usuarioNome}</span>
             </div>
-            <button className="btn btn-outline-danger btn-sm" onClick={handleLogout}>Sair</button>
+            <button className="btn btn-danger btn-sm" onClick={handleLogout}>Sair</button>
           </div>
         </header>
 

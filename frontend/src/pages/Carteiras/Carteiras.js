@@ -122,7 +122,7 @@ function Carteiras() {
               </div>
               <span>{usuarioNome}</span>
             </div>
-            <button className="btn btn-outline-danger btn-sm" onClick={handleLogout}>Sair</button>
+            <button className="btn btn-danger btn-sm" onClick={handleLogout}>Sair</button>
           </div>
         </header>
 
@@ -204,7 +204,7 @@ function Carteiras() {
                                 Usar esta
                               </button>
                             )}
-                            <button className="btn btn-sm btn-outline-danger" onClick={() => handleRemoverCarteira(cart)}>
+                            <button className="btn btn-sm btn-danger" onClick={() => handleRemoverCarteira(cart)}>
                               Remover
                             </button>
                           </div>
