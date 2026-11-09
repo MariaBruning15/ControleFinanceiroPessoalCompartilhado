@@ -37,6 +37,7 @@ function Transacoes() {
   const [totalElementos, setTotalElementos] = useState(0);
   const [carregando, setCarregando] = useState(true);
   const [erro, setErro] = useState('');
+  const [excluindoId, setExcluindoId] = useState(null);
 
   // Garante que existe uma carteira ativa (mesma lógica do Dashboard, sem criar nada)
   useEffect(() => {
@@ -103,6 +104,31 @@ function Transacoes() {
       setErro(e.response?.data?.message || 'Não foi possível carregar as transações.');
     } finally {
       setCarregando(false);
+    }
+  };
+
+  const handleExcluir = async (t) => {
+    const resumo = `${formatarData(t.data)} - ${t.descricao || 'Sem descrição'} (${formatarValor(t.valor)})`;
+    if (!window.confirm(`Excluir esta transação?\n\n${resumo}\n\nEssa ação não pode ser desfeita.`)) {
+      return;
+    }
+
+    try {
+      setExcluindoId(t.id);
+      await transacaoService.remover(walletId, t.id);
+
+      // Se era o último item da página (e não é a primeira), volta uma página;
+      // caso contrário, recarrega a página atual.
+      if (transacoes.length === 1 && pagina > 0) {
+        setPagina((p) => p - 1);
+      } else {
+        await carregarTransacoes(walletId, pagina);
+      }
+    } catch (e) {
+      console.error('Erro ao excluir transação:', e.response?.data || e.message);
+      alert(e.response?.data?.message || 'Não foi possível excluir a transação.');
+    } finally {
+      setExcluindoId(null);
     }
   };
 
@@ -272,6 +298,7 @@ function Transacoes() {
                         <th>Categoria</th>
                         <th>Tipo</th>
                         <th className="text-end">Valor</th>
+                        <th className="text-end">Ações</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -289,6 +316,15 @@ function Transacoes() {
                             </td>
                             <td className={`text-end fw-bold ${receita ? 'text-success' : 'text-danger'}`}>
                               {receita ? '+' : '-'} {formatarValor(t.valor)}
+                            </td>
+                            <td className="text-end">
+                              <button
+                                className="btn btn-sm btn-outline-danger"
+                                onClick={() => handleExcluir(t)}
+                                disabled={excluindoId === t.id}
+                              >
+                                {excluindoId === t.id ? 'Excluindo...' : 'Excluir'}
+                              </button>
                             </td>
                           </tr>
                         );
