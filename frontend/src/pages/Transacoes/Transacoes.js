@@ -6,6 +6,7 @@ import carteiraService from '../../services/CarteiraService';
 import './Transacoes.css';
 
 const TAMANHO_PAGINA = 10;
+const FILTROS_VAZIOS = { tipo: '', categoryId: '', startDate: '', endDate: '' };
 
 function formatarData(data) {
   // Recebe 'YYYY-MM-DD' e evita conversão de fuso horário
@@ -26,7 +27,11 @@ function Transacoes() {
 
   const [walletId, setWalletId] = useState(localStorage.getItem('carteiraId'));
   const [transacoes, setTransacoes] = useState([]);
+  const [categorias, setCategorias] = useState([]);
   const [categoriasPorId, setCategoriasPorId] = useState({});
+  const [filtros, setFiltros] = useState(FILTROS_VAZIOS); // valores digitados no formulário
+  const [filtrosAplicados, setFiltrosAplicados] = useState(FILTROS_VAZIOS); // valores usados na busca
+  const [erroFiltro, setErroFiltro] = useState('');
   const [pagina, setPagina] = useState(0);
   const [totalPaginas, setTotalPaginas] = useState(0);
   const [totalElementos, setTotalElementos] = useState(0);
@@ -62,10 +67,12 @@ function Transacoes() {
     const carregarCategorias = async () => {
       try {
         const resp = await categoriaService.listar();
+        const lista = Array.isArray(resp?.data) ? resp.data : [];
         const mapa = {};
-        (Array.isArray(resp?.data) ? resp.data : []).forEach((c) => {
+        lista.forEach((c) => {
           mapa[c.id] = c.nome;
         });
+        setCategorias(lista);
         setCategoriasPorId(mapa);
       } catch (e) {
         console.error('Erro ao carregar categorias:', e);
@@ -79,13 +86,13 @@ function Transacoes() {
       carregarTransacoes(walletId, pagina);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [walletId, pagina]);
+  }, [walletId, pagina, filtrosAplicados]);
 
   const carregarTransacoes = async (carteiraId, numeroPagina) => {
     try {
       setCarregando(true);
       setErro('');
-      const resp = await transacaoService.listar(carteiraId, numeroPagina, TAMANHO_PAGINA);
+      const resp = await transacaoService.listar(carteiraId, numeroPagina, TAMANHO_PAGINA, filtrosAplicados);
       const dados = resp?.data || {};
 
       setTransacoes(Array.isArray(dados.content) ? dados.content : []);
@@ -98,6 +105,41 @@ function Transacoes() {
       setCarregando(false);
     }
   };
+
+  const handleMudarFiltro = (campo, valor) => {
+    setFiltros((atual) => {
+      const novo = { ...atual, [campo]: valor };
+      // Se trocar o tipo e a categoria escolhida não for desse tipo, limpa a categoria
+      if (campo === 'tipo' && atual.categoryId) {
+        const cat = categorias.find((c) => c.id === atual.categoryId);
+        if (valor && cat && cat.tipo !== valor) novo.categoryId = '';
+      }
+      return novo;
+    });
+  };
+
+  const handleAplicarFiltros = (e) => {
+    e.preventDefault();
+    if (filtros.startDate && filtros.endDate && filtros.startDate > filtros.endDate) {
+      setErroFiltro('A data inicial não pode ser maior que a data final.');
+      return;
+    }
+    setErroFiltro('');
+    setPagina(0);
+    setFiltrosAplicados(filtros);
+  };
+
+  const handleLimparFiltros = () => {
+    setErroFiltro('');
+    setFiltros(FILTROS_VAZIOS);
+    setPagina(0);
+    setFiltrosAplicados(FILTROS_VAZIOS);
+  };
+
+  const filtrosAtivos = Object.values(filtrosAplicados).some(Boolean);
+  const categoriasDoSelect = filtros.tipo
+    ? categorias.filter((c) => c.tipo === filtros.tipo)
+    : categorias;
 
   const nomeCategoria = (t) =>
     t.categoria?.nome || categoriasPorId[t.categoria?.id] || categoriasPorId[t.categoriaId] || '—';
@@ -148,6 +190,64 @@ function Transacoes() {
               )}
             </div>
 
+            <form className="row g-2 align-items-end mb-3" onSubmit={handleAplicarFiltros}>
+              <div className="col-6 col-lg-2">
+                <label className="form-label small mb-1">Tipo</label>
+                <select
+                  className="form-select form-select-sm"
+                  value={filtros.tipo}
+                  onChange={(e) => handleMudarFiltro('tipo', e.target.value)}
+                >
+                  <option value="">Todas</option>
+                  <option value="RECEITA">Receita</option>
+                  <option value="DESPESA">Despesa</option>
+                </select>
+              </div>
+              <div className="col-6 col-lg-3">
+                <label className="form-label small mb-1">Categoria</label>
+                <select
+                  className="form-select form-select-sm"
+                  value={filtros.categoryId}
+                  onChange={(e) => handleMudarFiltro('categoryId', e.target.value)}
+                >
+                  <option value="">Todas</option>
+                  {categoriasDoSelect.map((c) => (
+                    <option key={c.id} value={c.id}>{c.nome}</option>
+                  ))}
+                </select>
+              </div>
+              <div className="col-6 col-lg-2">
+                <label className="form-label small mb-1">De</label>
+                <input
+                  type="date"
+                  className="form-control form-control-sm"
+                  value={filtros.startDate}
+                  onChange={(e) => handleMudarFiltro('startDate', e.target.value)}
+                />
+              </div>
+              <div className="col-6 col-lg-2">
+                <label className="form-label small mb-1">Até</label>
+                <input
+                  type="date"
+                  className="form-control form-control-sm"
+                  value={filtros.endDate}
+                  onChange={(e) => handleMudarFiltro('endDate', e.target.value)}
+                />
+              </div>
+              <div className="col-12 col-lg-3 d-flex gap-2">
+                <button type="submit" className="btn btn-primary btn-sm flex-grow-1">Filtrar</button>
+                <button
+                  type="button"
+                  className="btn btn-outline-light btn-sm flex-grow-1"
+                  onClick={handleLimparFiltros}
+                  disabled={!filtrosAtivos && !Object.values(filtros).some(Boolean)}
+                >
+                  Limpar filtros
+                </button>
+              </div>
+              {erroFiltro && <div className="col-12 text-danger small">{erroFiltro}</div>}
+            </form>
+
             {erro ? (
               <div className="alert alert-danger mb-0">{erro}</div>
             ) : carregando ? (
@@ -156,7 +256,11 @@ function Transacoes() {
                 <p>Carregando transações...</p>
               </div>
             ) : transacoes.length === 0 ? (
-              <p className="text-white-50 text-center py-4 mb-0">Nenhuma transação cadastrada nesta carteira.</p>
+              <p className="text-white-50 text-center py-4 mb-0">
+                {filtrosAtivos
+                  ? 'Nenhuma transação encontrada com esses filtros.'
+                  : 'Nenhuma transação cadastrada nesta carteira.'}
+              </p>
             ) : (
               <>
                 <div className="table-responsive">
