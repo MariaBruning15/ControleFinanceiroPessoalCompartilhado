@@ -7,6 +7,7 @@ import RedefinirSenha from './pages/RedefinirSenha/RedefinirSenha';
 import Dashboard from './pages/Dashboard/Dashboard';
 import Categorias from './pages/Categorias/Categorias';
 import Carteiras from './pages/Carteiras/Carteiras';
+import Transacoes from './pages/Transacoes/Transacoes';
 import AlterarSenha from './pages/AlterarSenha/AlterarSenha';
 import { PrivateRoute } from './routes/PrivateRouter';
 
@@ -23,6 +24,7 @@ function App() {
         <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/categorias" element={<Categorias />} />
         <Route path="/carteiras" element={<Carteiras />} />
+        <Route path="/transacoes" element={<Transacoes />} />
         <Route path="/app/perfil/senha" element={<PrivateRoute><AlterarSenha /></PrivateRoute>} />
         <Route path="/redefinir-senha/:token" element={<RedefinirSenha />} />
       </Routes>

@@ -19,6 +19,17 @@ class TransacaoService extends BaseService {
     return await this.api.get(url);
   }
 
+  async listar(walletId, page = 0, size = 10, filtros = {}) {
+    const params = new URLSearchParams({ page, size, sort: 'data,desc' });
+    if (filtros.tipo) params.append('tipo', filtros.tipo);
+    if (filtros.categoryId) params.append('categoryId', filtros.categoryId);
+    if (filtros.startDate) params.append('startDate', filtros.startDate);
+    if (filtros.endDate) params.append('endDate', filtros.endDate);
+
+    const url = `${this.endPoint}/${walletId}/transacoes?${params.toString()}`;
+    return await this.api.get(url);
+  }
+
   async criarTransacao(walletId, transacaoDTO) {
     const url = `${this.endPoint}/${walletId}/transacoes`;
     return await this.api.post(url, transacaoDTO);

@@ -104,7 +104,7 @@ function Carteiras() {
         <h3 className="text-primary font-weight-bold mb-4">Mercúrio</h3>
         <nav className="nav flex-column gap-2">
           <button className="btn btn-outline-light text-start w-100" onClick={() => navigate('/dashboard')}>Dashboard</button>
-          <button className="btn btn-outline-light text-start w-100" onClick={() => navigate('/dashboard')}>Transações</button>
+          <button className="btn btn-outline-light text-start w-100" onClick={() => navigate('/transacoes')}>Transações</button>
           <button className="btn btn-outline-light text-start w-100" onClick={() => navigate('/categorias')}>Categorias</button>
           <button className="btn btn-primary text-start w-100">Carteiras</button>
           <button className="btn btn-outline-light text-start w-100">Perfil</button>
