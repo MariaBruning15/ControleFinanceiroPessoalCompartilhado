@@ -30,6 +30,11 @@ class TransacaoService extends BaseService {
     return await this.api.get(url);
   }
 
+  async atualizar(walletId, transacaoId, transacaoDTO) {
+    const url = `${this.endPoint}/${walletId}/transacoes/${transacaoId}`;
+    return await this.api.put(url, transacaoDTO);
+  }
+
   async remover(walletId, transacaoId) {
     const url = `${this.endPoint}/${walletId}/transacoes/${transacaoId}`;
     return await this.api.delete(url);

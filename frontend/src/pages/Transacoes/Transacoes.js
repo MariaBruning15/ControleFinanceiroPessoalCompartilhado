@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import transacaoService from '../../services/TransacaoService';
 import categoriaService from '../../services/CategoriaService';
 import carteiraService from '../../services/CarteiraService';
+import TransacaoModal from '../../components/TransacaoModal/TransacaoModal';
 import './Transacoes.css';
 
 const TAMANHO_PAGINA = 10;
@@ -38,6 +39,7 @@ function Transacoes() {
   const [carregando, setCarregando] = useState(true);
   const [erro, setErro] = useState('');
   const [excluindoId, setExcluindoId] = useState(null);
+  const [modal, setModal] = useState({ aberto: false, transacao: null }); // transacao null = criando
 
   // Garante que existe uma carteira ativa (mesma lógica do Dashboard, sem criar nada)
   useEffect(() => {
@@ -104,6 +106,20 @@ function Transacoes() {
       setErro(e.response?.data?.message || 'Não foi possível carregar as transações.');
     } finally {
       setCarregando(false);
+    }
+  };
+
+  const abrirNovaTransacao = () => setModal({ aberto: true, transacao: null });
+  const abrirEdicao = (t) => setModal({ aberto: true, transacao: t });
+  const fecharModal = () => setModal({ aberto: false, transacao: null });
+
+  const handleSalvo = () => {
+    // Nova transação: vai para a primeira página (ordenada pela data mais recente).
+    // Edição: recarrega a página atual.
+    if (!modal.transacao && pagina !== 0) {
+      setPagina(0);
+    } else {
+      carregarTransacoes(walletId, pagina);
     }
   };
 
@@ -197,6 +213,9 @@ function Transacoes() {
         <header className="p-3 border-bottom border-secondary d-flex justify-content-between align-items-center" style={{ backgroundColor: '#141824' }}>
           <h4 className="m-0">Transações</h4>
           <div className="d-flex align-items-center gap-3">
+            <button className="btn btn-primary me-2" onClick={abrirNovaTransacao} disabled={!walletId}>
+              + Nova Transação
+            </button>
             <div className="d-flex align-items-center gap-2">
               <div className="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center fw-bold" style={{ width: '38px', height: '38px' }}>
                 {usuarioInicial}
@@ -319,6 +338,13 @@ function Transacoes() {
                             </td>
                             <td className="text-end">
                               <button
+                                className="btn btn-sm btn-outline-light me-2"
+                                onClick={() => abrirEdicao(t)}
+                                disabled={excluindoId === t.id}
+                              >
+                                Editar
+                              </button>
+                              <button
                                 className="btn btn-sm btn-outline-danger"
                                 onClick={() => handleExcluir(t)}
                                 disabled={excluindoId === t.id}
@@ -357,6 +383,15 @@ function Transacoes() {
           </div>
         </div>
       </main>
+
+      {modal.aberto && (
+        <TransacaoModal
+          walletId={walletId}
+          transacao={modal.transacao}
+          onFechar={fecharModal}
+          onSalvo={handleSalvo}
+        />
+      )}
     </div>
   );
 }
