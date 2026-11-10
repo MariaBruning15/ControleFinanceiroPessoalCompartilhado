@@ -4,6 +4,8 @@ import transacaoService from '../../services/TransacaoService';
 import categoriaService from '../../services/CategoriaService';
 import carteiraService from '../../services/CarteiraService';
 import TransacaoModal from '../../components/TransacaoModal/TransacaoModal';
+import AtividadeCarteira from '../../components/AtividadeCarteira/AtividadeCarteira';
+import useCarteiraAoVivo from '../../hooks/useCarteiraAoVivo';
 import './Transacoes.css';
 
 const TAMANHO_PAGINA = 10;
@@ -91,9 +93,10 @@ function Transacoes() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [walletId, pagina, filtrosAplicados]);
 
-  const carregarTransacoes = async (carteiraId, numeroPagina) => {
+  // silencioso = true atualiza a lista sem trocá-la pelo "carregando" (usado no tempo real)
+  const carregarTransacoes = async (carteiraId, numeroPagina, silencioso = false) => {
     try {
-      setCarregando(true);
+      if (!silencioso) setCarregando(true);
       setErro('');
       const resp = await transacaoService.listar(carteiraId, numeroPagina, TAMANHO_PAGINA, filtrosAplicados);
       const dados = resp?.data || {};
@@ -105,9 +108,19 @@ function Transacoes() {
       console.error('Erro ao carregar transações:', e.response?.data || e.message);
       setErro(e.response?.data?.message || 'Não foi possível carregar as transações.');
     } finally {
-      setCarregando(false);
+      if (!silencioso) setCarregando(false);
     }
   };
+
+  // Tempo real: quando outro membro mexe numa transação, atualiza a lista na hora
+  const { conectado, online, atividades } = useCarteiraAoVivo(walletId, {
+    onTransacao: (evento) => {
+      if (evento.usuarioId !== localStorage.getItem('usuarioId')) {
+        carregarTransacoes(walletId, pagina, true);
+      }
+    },
+    onReconectar: () => carregarTransacoes(walletId, pagina, true),
+  });
 
   const abrirNovaTransacao = () => setModal({ aberto: true, transacao: null });
   const abrirEdicao = (t) => setModal({ aberto: true, transacao: t });
@@ -227,6 +240,8 @@ function Transacoes() {
         </header>
 
         <div className="p-4 flex-grow-1">
+          {walletId && <AtividadeCarteira conectado={conectado} online={online} atividades={atividades} />}
+
           <div className="card text-white p-3 border-0" style={{ backgroundColor: '#232943' }}>
             <div className="d-flex justify-content-between align-items-center mb-3">
               <h5 className="m-0">Histórico de Transações</h5>

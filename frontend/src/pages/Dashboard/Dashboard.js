@@ -3,6 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import transacaoService from '../../services/TransacaoService';
 import carteiraService from '../../services/CarteiraService';
 import TransacaoModal from '../../components/TransacaoModal/TransacaoModal';
+import AtividadeCarteira from '../../components/AtividadeCarteira/AtividadeCarteira';
+import useCarteiraAoVivo from '../../hooks/useCarteiraAoVivo';
 import './Dashboard.css';
 
 import {
@@ -50,6 +52,16 @@ function Dashboard() {
 
   const [exibirModal, setExibirModal] = useState(false);
 
+  // Tempo real: quando outro membro mexe numa transação, atualiza o resumo e o gráfico na hora
+  const { conectado, online, atividades } = useCarteiraAoVivo(walletId, {
+    onTransacao: (evento) => {
+      if (evento.usuarioId !== localStorage.getItem('usuarioId')) {
+        carregarDadosDashboard(walletId, true);
+      }
+    },
+    onReconectar: () => carregarDadosDashboard(walletId, true),
+  });
+
   useEffect(() => {
     resolverCarteira();
   }, []);
@@ -92,9 +104,10 @@ function Dashboard() {
     }
   };
 
-  const carregarDadosDashboard = async (walletIdAtual) => {
+  // silencioso = true atualiza os dados sem trocar a tela pelo "carregando" (usado no tempo real)
+  const carregarDadosDashboard = async (walletIdAtual, silencioso = false) => {
     try {
-      setCarregando(true);
+      if (!silencioso) setCarregando(true);
 
       const [summaryResp, recentesResp] = await Promise.all([
         transacaoService.obterResumoDashboard(walletIdAtual),
@@ -144,7 +157,7 @@ function Dashboard() {
     } catch (erro) {
       console.error('Erro ao carregar dados do dashboard:', erro);
     } finally {
-      setCarregando(false);
+      if (!silencioso) setCarregando(false);
     }
   };
 
@@ -207,6 +220,8 @@ function Dashboard() {
         </header>
 
         <div className="p-4 flex-grow-1">
+          {walletId && <AtividadeCarteira conectado={conectado} online={online} atividades={atividades} />}
+
           {erroCarteira ? (
             <div className="alert alert-danger">{erroCarteira}</div>
           ) : carregando ? (

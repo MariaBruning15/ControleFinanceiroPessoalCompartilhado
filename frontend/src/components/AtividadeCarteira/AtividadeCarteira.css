@@ -1,0 +1,42 @@
+.atividade-ponto {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background-color: #6c757d;
+  flex-shrink: 0;
+}
+
+.atividade-ponto.ao-vivo {
+  background-color: #2ecc71;
+  animation: atividade-pulso 1.8s infinite;
+}
+
+@keyframes atividade-pulso {
+  0% { box-shadow: 0 0 0 0 rgba(46, 204, 113, 0.6); }
+  70% { box-shadow: 0 0 0 8px rgba(46, 204, 113, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(46, 204, 113, 0); }
+}
+
+.atividade-avatar {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: #fff;
+  background-color: #3b4d8e;
+  border: 2px solid #232943;
+  margin-left: -6px;
+}
+
+.atividade-avatar:first-child {
+  margin-left: 0;
+}
+
+.atividade-avatar.eu {
+  background-color: #2ecc71;
+}

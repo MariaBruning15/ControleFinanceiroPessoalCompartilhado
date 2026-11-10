@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import carteiraService from '../../services/CarteiraService';
+import CompartilharCarteiraModal, { rotuloPapel } from '../../components/CompartilharCarteiraModal/CompartilharCarteiraModal';
 import './Carteiras.css';
 
 function Carteiras() {
@@ -18,6 +19,8 @@ function Carteiras() {
   const [descricao, setDescricao] = useState('');
   const [saldoInicial, setSaldoInicial] = useState('');
   const [erro, setErro] = useState('');
+  const [infoMembros, setInfoMembros] = useState({}); // id da carteira -> { total, meuPapel }
+  const [carteiraCompartilhando, setCarteiraCompartilhando] = useState(null);
 
   useEffect(() => {
     carregarCarteiras();
@@ -27,12 +30,32 @@ function Carteiras() {
     try {
       setCarregando(true);
       const resp = await carteiraService.listar();
-      setCarteiras(Array.isArray(resp?.data) ? resp.data : []);
+      const lista = Array.isArray(resp?.data) ? resp.data : [];
+      setCarteiras(lista);
+      carregarInfoMembros(lista);
     } catch (erro) {
       console.error('Erro ao carregar carteiras:', erro);
     } finally {
       setCarregando(false);
     }
+  };
+
+  // Para cada carteira, descobre quantos membros ela tem e qual é o papel do usuário logado
+  const carregarInfoMembros = async (lista) => {
+    const meuId = localStorage.getItem('usuarioId');
+    const entradas = await Promise.all(
+      lista.map(async (c) => {
+        try {
+          const resp = await carteiraService.listarMembros(c.id);
+          const membros = Array.isArray(resp?.data) ? resp.data : [];
+          const eu = membros.find((m) => m.usuarioId === meuId);
+          return [c.id, { total: membros.length, meuPapel: eu?.papel || null }];
+        } catch (e) {
+          return [c.id, { total: 0, meuPapel: null }];
+        }
+      })
+    );
+    setInfoMembros(Object.fromEntries(entradas));
   };
 
   const handleCriarCarteira = async (e) => {
@@ -194,6 +217,14 @@ function Carteiras() {
                             <div className="fw-bold">
                               {cart.nome}{' '}
                               {ativa && <span className="badge bg-success ms-1">Ativa</span>}
+                              {infoMembros[cart.id]?.total > 1 && (
+                                <span className="badge bg-info text-dark ms-1">
+                                  Compartilhada · {infoMembros[cart.id].total} membros
+                                </span>
+                              )}
+                              {infoMembros[cart.id]?.meuPapel && (
+                                <span className="badge bg-secondary ms-1">{rotuloPapel(infoMembros[cart.id].meuPapel)}</span>
+                              )}
                             </div>
                             {cart.descricao && <small className="text-white d-block">{cart.descricao}</small>}
                             <small className="text-white">Saldo inicial: R$ {Number(cart.saldoInicial || 0).toFixed(2)}</small>
@@ -204,7 +235,15 @@ function Carteiras() {
                                 Usar esta
                               </button>
                             )}
-                            <button className="btn btn-sm btn-danger" onClick={() => handleRemoverCarteira(cart)}>
+                            <button className="btn btn-sm btn-primary" onClick={() => setCarteiraCompartilhando(cart)}>
+                              Compartilhar
+                            </button>
+                            <button
+                              className="btn btn-sm btn-danger"
+                              onClick={() => handleRemoverCarteira(cart)}
+                              disabled={infoMembros[cart.id] && infoMembros[cart.id].meuPapel !== 'DONO'}
+                              title={infoMembros[cart.id] && infoMembros[cart.id].meuPapel !== 'DONO' ? 'Só o dono pode remover a carteira' : ''}
+                            >
                               Remover
                             </button>
                           </div>
@@ -218,6 +257,14 @@ function Carteiras() {
           </div>
         </div>
       </main>
+
+      {carteiraCompartilhando && (
+        <CompartilharCarteiraModal
+          carteira={carteiraCompartilhando}
+          onFechar={() => setCarteiraCompartilhando(null)}
+          onAlterado={() => carregarInfoMembros(carteiras)}
+        />
+      )}
     </div>
   );
 }
