@@ -19,8 +19,8 @@ import org.springframework.web.bind.annotation.RestController;
 import com.ifpr.backend.dto.AdicionarMembroRequestDTO;
 import com.ifpr.backend.dto.AlterarPapelRequestDTO;
 import com.ifpr.backend.dto.CarteiraRequestDTO;
+import com.ifpr.backend.dto.MembroResponseDTO;
 import com.ifpr.backend.model.Carteira;
-import com.ifpr.backend.model.CarteiraMembro;
 import com.ifpr.backend.service.CarteiraService;
 
 import jakarta.validation.Valid;
@@ -71,25 +71,25 @@ public class CarteiraController {
     // 5.5 WALLET MEMBERS
 
     @GetMapping("/{id}/members")
-    public ResponseEntity<List<CarteiraMembro>> listarMembros(@PathVariable UUID id,
+    public ResponseEntity<List<MembroResponseDTO>> listarMembros(@PathVariable UUID id,
                                                               @RequestHeader("X-Usuario-Id") UUID usuarioId) {
         return ResponseEntity.ok(carteiraService.listarMembros(id, usuarioId));
     }
 
     @PostMapping("/{id}/members")
-    public ResponseEntity<CarteiraMembro> adicionarMembro(@PathVariable UUID id,
+    public ResponseEntity<MembroResponseDTO> adicionarMembro(@PathVariable UUID id,
                                                           @Valid @RequestBody AdicionarMembroRequestDTO dto,
                                                           @RequestHeader("X-Usuario-Id") UUID usuarioId) {
-        CarteiraMembro novoMembro = carteiraService.adicionarMembro(id, dto.getEmail(), dto.getPapel(), usuarioId);
+        MembroResponseDTO novoMembro = carteiraService.adicionarMembro(id, dto.getEmail(), dto.getPapel(), usuarioId);
         return ResponseEntity.status(HttpStatus.CREATED).body(novoMembro);
     }
 
     @PatchMapping("/{id}/members/{userId}")
-    public ResponseEntity<CarteiraMembro> alterarPapelMembro(@PathVariable UUID id,
+    public ResponseEntity<MembroResponseDTO> alterarPapelMembro(@PathVariable UUID id,
                                                             @PathVariable UUID userId,
                                                             @Valid @RequestBody AlterarPapelRequestDTO dto,
                                                             @RequestHeader("X-Usuario-Id") UUID usuarioId) {
-        CarteiraMembro atualizado = carteiraService.alterarPapelMembro(id, userId, dto.getPapel(), usuarioId);
+        MembroResponseDTO atualizado = carteiraService.alterarPapelMembro(id, userId, dto.getPapel(), usuarioId);
         return ResponseEntity.ok(atualizado);
     }
 

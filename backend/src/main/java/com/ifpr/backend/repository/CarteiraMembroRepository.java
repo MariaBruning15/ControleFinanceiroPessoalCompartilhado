@@ -18,4 +18,6 @@ public interface CarteiraMembroRepository extends JpaRepository<CarteiraMembro, 
     boolean existsByCarteiraIdAndUsuarioIdAndPapel(UUID carteiraId, UUID usuarioId, PapelCarteira papel);
 
     void deleteByCarteiraIdAndUsuarioId(UUID carteiraId, UUID usuarioId);
+
+    long countByCarteiraIdAndPapel(UUID carteiraId, PapelCarteira papel);
 }

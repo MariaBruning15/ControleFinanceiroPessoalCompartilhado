@@ -7,7 +7,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.ifpr.backend.exception.AcessoNegadoException;
+import com.ifpr.backend.dto.MembroResponseDTO;
 import com.ifpr.backend.exception.RecursoJaExisteException;
+import com.ifpr.backend.exception.RegraNegocioException;
 import com.ifpr.backend.exception.ResourceNotFoundException;
 import com.ifpr.backend.model.Carteira;
 import com.ifpr.backend.model.CarteiraMembro;
@@ -74,13 +76,16 @@ public class CarteiraService {
     }
 
 
-    public List<CarteiraMembro> listarMembros(UUID carteiraId, UUID usuarioId) {
+    @Transactional(readOnly = true)
+    public List<MembroResponseDTO> listarMembros(UUID carteiraId, UUID usuarioId) {
         validarMembro(carteiraId, usuarioId);
-        return carteiraMembroRepository.findByCarteiraId(carteiraId);
+        return carteiraMembroRepository.findByCarteiraId(carteiraId).stream()
+                .map(MembroResponseDTO::de)
+                .toList();
     }
 
     @Transactional
-    public CarteiraMembro adicionarMembro(UUID carteiraId, String emailMembro, PapelCarteira papel, UUID usuarioRequisitanteId) {
+    public MembroResponseDTO adicionarMembro(UUID carteiraId, String emailMembro, PapelCarteira papel, UUID usuarioRequisitanteId) {
         validarPermissao(carteiraId, usuarioRequisitanteId, List.of(PapelCarteira.DONO)); // Somente OWNER (403 se falhar)[cite: 2]
 
         Carteira carteira = carteiraRepository.findById(carteiraId)
@@ -94,18 +99,22 @@ public class CarteiraService {
         }
 
         CarteiraMembro membro = new CarteiraMembro(carteira, novoMembro, papel);
-        return carteiraMembroRepository.save(membro);
+        return MembroResponseDTO.de(carteiraMembroRepository.save(membro));
     }
 
     @Transactional
-    public CarteiraMembro alterarPapelMembro(UUID carteiraId, UUID targetUserId, PapelCarteira novoPapel, UUID usuarioRequisitanteId) {
+    public MembroResponseDTO alterarPapelMembro(UUID carteiraId, UUID targetUserId, PapelCarteira novoPapel, UUID usuarioRequisitanteId) {
         validarPermissao(carteiraId, usuarioRequisitanteId, List.of(PapelCarteira.DONO)); // Somente OWNER[cite: 2]
 
         CarteiraMembro membro = carteiraMembroRepository.findByCarteiraIdAndUsuarioId(carteiraId, targetUserId)
                 .orElseThrow(() -> new ResourceNotFoundException("Membro não encontrado nesta carteira."));
 
+        if (membro.getPapel() == PapelCarteira.DONO && novoPapel != PapelCarteira.DONO) {
+            garantirOutroDono(carteiraId);
+        }
+
         membro.setPapel(novoPapel);
-        return carteiraMembroRepository.save(membro);
+        return MembroResponseDTO.de(carteiraMembroRepository.save(membro));
     }
 
     @Transactional
@@ -115,7 +124,18 @@ public class CarteiraService {
         CarteiraMembro membro = carteiraMembroRepository.findByCarteiraIdAndUsuarioId(carteiraId, targetUserId)
                 .orElseThrow(() -> new ResourceNotFoundException("Membro não encontrado nesta carteira."));
 
+        if (membro.getPapel() == PapelCarteira.DONO) {
+            garantirOutroDono(carteiraId);
+        }
+
         carteiraMembroRepository.delete(membro);
+    }
+
+    // Impede que a carteira fique sem nenhum DONO (ninguém mais conseguiria gerenciá-la)
+    private void garantirOutroDono(UUID carteiraId) {
+        if (carteiraMembroRepository.countByCarteiraIdAndPapel(carteiraId, PapelCarteira.DONO) <= 1) {
+            throw new RegraNegocioException("A carteira precisa ter pelo menos um DONO. Promova outro membro a DONO antes.");
+        }
     }
 
     public void validarMembro(UUID carteiraId, UUID usuarioId) {
@@ -128,7 +148,7 @@ public class CarteiraService {
                 .orElseThrow(() -> new AcessoNegadoException("Acesso negado: Você não é membro desta carteira."));
 
         if (!papeisPermitidos.contains(membro.getPapel())) {
-            throw new AcessoNegadoException("Acesso negado: Somente o OWNER pode realizar esta operação.");
+            throw new AcessoNegadoException("Acesso negado: seu papel nesta carteira não permite esta operação.");
         }
     }
 }

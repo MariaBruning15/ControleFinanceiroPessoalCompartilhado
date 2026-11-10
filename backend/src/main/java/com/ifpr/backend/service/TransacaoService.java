@@ -35,17 +35,20 @@ public class TransacaoService {
     private final CategoriaRepository categoriaRepository;
     private final UsuarioRepository usuarioRepository;
     private final CarteiraService carteiraService;
+    private final CarteiraEventosService eventosService;
 
     public TransacaoService(TransacaoRepository transacaoRepository,
                             CarteiraRepository carteiraRepository,
                             CategoriaRepository categoriaRepository,
                             UsuarioRepository usuarioRepository,
-                            CarteiraService carteiraService) {
+                            CarteiraService carteiraService,
+                            CarteiraEventosService eventosService) {
         this.transacaoRepository = transacaoRepository;
         this.carteiraRepository = carteiraRepository;
         this.categoriaRepository = categoriaRepository;
         this.usuarioRepository = usuarioRepository;
         this.carteiraService = carteiraService;
+        this.eventosService = eventosService;
     }
 
     public Page<Transacao> listarPorCarteiraEFiltros(UUID carteiraId, UUID usuarioId, TipoTransacao tipo,
@@ -80,7 +83,9 @@ public class TransacaoService {
         transacao.setCarteira(carteira);
         transacao.setCriadoPor(usuario);
 
-        return transacaoRepository.save(transacao);
+        Transacao salva = transacaoRepository.save(transacao);
+        eventosService.publicarTransacao(carteiraId, "CRIADA", salva, usuarioId);
+        return salva;
     }
 
     @Transactional
@@ -103,7 +108,9 @@ public class TransacaoService {
         transacao.setDescricao(dados.getDescricao());
         transacao.setData(dados.getData());
 
-        return transacaoRepository.save(transacao);
+        Transacao atualizada = transacaoRepository.save(transacao);
+        eventosService.publicarTransacao(carteiraId, "ATUALIZADA", atualizada, usuarioId);
+        return atualizada;
     }
 
     @Transactional
@@ -114,6 +121,7 @@ public class TransacaoService {
                 .orElseThrow(() -> new ResourceNotFoundException("Transação não encontrada nesta carteira."));
 
         transacaoRepository.delete(transacao);
+        eventosService.publicarTransacao(carteiraId, "REMOVIDA", transacao, usuarioId);
     }
 
     public DashboardSummaryDTO obterResumoDashboard(UUID carteiraId, UUID usuarioId, LocalDate startDate, LocalDate endDate) {
