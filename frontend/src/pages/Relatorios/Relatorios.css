@@ -1,0 +1,48 @@
+.relatorio-barra {
+  height: 8px;
+  border-radius: 4px;
+  background-color: rgba(255, 255, 255, 0.12);
+  overflow: hidden;
+}
+
+.relatorio-barra > div {
+  height: 100%;
+  border-radius: 4px;
+}
+
+/* Impressão / salvar como PDF: só o relatório, em preto no branco */
+@media print {
+  .no-print {
+    display: none !important;
+  }
+
+  .relatorio-pagina,
+  .relatorio-pagina * {
+    background: #fff !important;
+    color: #000 !important;
+    box-shadow: none !important;
+  }
+
+  .relatorio-pagina {
+    min-height: 0 !important;
+  }
+
+  .relatorio-pagina .relatorio-barra {
+    border: 1px solid #999;
+  }
+
+  .relatorio-pagina .relatorio-barra > div {
+    background: #666 !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  .relatorio-pagina .card {
+    border: 1px solid #ccc !important;
+    break-inside: avoid;
+  }
+
+  .relatorio-pagina tr {
+    break-inside: avoid;
+  }
+}
