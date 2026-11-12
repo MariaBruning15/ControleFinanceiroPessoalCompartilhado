@@ -188,17 +188,17 @@ function Dashboard() {
   };
 
   return (
-    <div className="d-flex text-white min-vh-100" style={{ backgroundColor: '#1a1f36' }}>
+    <div className="d-flex text-white min-vh-100" style={{ backgroundColor: 'var(--bg)' }}>
       
-      <aside className="p-3 border-end border-secondary d-flex flex-column" style={{ width: '240px', backgroundColor: '#141824' }}>
+      <aside className="p-3 border-end border-secondary d-flex flex-column" style={{ width: '20%', backgroundColor: 'white' }}>
         <h3 className="text-primary font-weight-bold mb-4">Mercúrio</h3>
         <nav className="nav flex-column gap-2">
           <button className="btn btn-primary text-start w-100">Dashboard</button>
-          <button className="btn btn-outline-light text-start w-100" onClick={() => navigate('/transacoes')}>Transações</button>
-          <button className="btn btn-outline-light text-start w-100" onClick={() => navigate('/relatorios')}>Relatórios</button>
-          <button className="btn btn-outline-light text-start w-100" onClick={() => navigate('/categorias')}>Categorias</button>
-          <button className="btn btn-outline-light text-start w-100" onClick={() => navigate('/carteiras')}>Carteiras</button>
-          <button className="btn btn-outline-light text-start w-100">Perfil</button>
+          <button className="btn btn-secondary text-start w-100" onClick={() => navigate('/transacoes')}>Transações</button>
+          <button className="btn btn-secondary text-start w-100" onClick={() => navigate('/relatorios')}>Relatórios</button>
+          <button className="btn btn-secondary text-start w-100" onClick={() => navigate('/categorias')}>Categorias</button>
+          <button className="btn btn-secondary text-start w-100" onClick={() => navigate('/carteiras')}>Carteiras</button>
+          <button className="btn btn-secondary text-start w-100">Perfil</button>
         </nav>
       </aside>
 
