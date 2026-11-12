@@ -27,7 +27,7 @@ public class DashboardController {
 
     @GetMapping
     public ResponseEntity<DashboardSummaryDTO> obterResumo(
-            @PathVariable UUID walletId,
+            @PathVariable("carteiraId") UUID walletId,
             @RequestParam(value = "startDate", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
             @RequestParam(value = "endDate", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate,
             @RequestHeader("X-Usuario-Id") UUID usuarioId) {

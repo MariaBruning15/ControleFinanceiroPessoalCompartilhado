@@ -1,5 +1,6 @@
 package com.ifpr.backend.repository;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
@@ -43,6 +44,17 @@ public interface TransacaoRepository extends JpaRepository<Transacao, UUID> {
     List<DashboardSummaryDTO.CategorySummaryDTO> findSummaryByCategory(@Param("carteiraId") UUID carteiraId,
                                                                         @Param("startDate") LocalDate startDate,
                                                                         @Param("endDate") LocalDate endDate);
+
+    // Soma os valores de um tipo até a data final; "inicio" nulo = desde o começo.
+    // Devolve null quando não há nenhuma transação no período.
+    @Query("SELECT SUM(t.valor) FROM Transacao t WHERE t.carteira.id = :carteiraId " +
+           "AND t.tipo = :tipo " +
+           "AND (:inicio IS NULL OR t.data >= :inicio) " +
+           "AND t.data <= :fim")
+    BigDecimal somarPorTipo(@Param("carteiraId") UUID carteiraId,
+                            @Param("tipo") TipoTransacao tipo,
+                            @Param("inicio") LocalDate inicio,
+                            @Param("fim") LocalDate fim);
 
     // Consulta transações filtradas por período para processar o resumo geral e por mês
     @Query("SELECT t FROM Transacao t WHERE t.carteira.id = :carteiraId " +
