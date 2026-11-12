@@ -47,7 +47,7 @@ function AtividadeCarteira({ conectado, online, atividades }) {
       <div className="d-flex flex-wrap align-items-center gap-3">
         <div className="d-flex align-items-center gap-2">
           <span className={`atividade-ponto ${conectado ? 'ao-vivo' : ''}`}></span>
-          <small className="fw-bold">{conectado ? 'Ao vivo' : 'Offline'}</small>
+          <small className="fw-bold">{conectado ? 'Online' : 'Offline'}</small>
         </div>
 
         <div className="d-flex align-items-center">
