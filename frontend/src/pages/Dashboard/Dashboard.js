@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import transacaoService from '../../services/TransacaoService';
 import carteiraService from '../../services/CarteiraService';
 import TransacaoModal from '../../components/TransacaoModal/TransacaoModal';
+import CardComponent from '../../components/Card/Card';
 import AtividadeCarteira from '../../components/AtividadeCarteira/AtividadeCarteira';
 import useCarteiraAoVivo from '../../hooks/useCarteiraAoVivo';
 import './Dashboard.css';
@@ -190,7 +191,7 @@ function Dashboard() {
   return (
     <div className="d-flex text-white min-vh-100" style={{ backgroundColor: 'var(--bg)' }}>
       
-      <aside className="p-3 border-end border-secondary d-flex flex-column" style={{ width: '20%', backgroundColor: 'white' }}>
+      <aside className="p-3 border-end border-secondary d-flex flex-column" style={{ width: '20%', backgroundColor: 'var(--secondary-color)' }}>
         <h3 className="text-primary font-weight-bold mb-4">Mercúrio</h3>
         <nav className="nav flex-column gap-2">
           <button className="btn btn-primary text-start w-100">Dashboard</button>
@@ -204,14 +205,14 @@ function Dashboard() {
 
       <main className="flex-grow-1 d-flex flex-column">
         
-        <header className="p-3 border-bottom border-secondary d-flex justify-content-between align-items-center" style={{ backgroundColor: '#141824' }}>
+        <header className="p-3 border-secondary d-flex justify-content-between align-items-center" style={{ backgroundColor: 'var(--secondary-color)' }}>
           <h4 className="m-0">Resumo Financeiro</h4>
           <div className="d-flex align-items-center gap-3">
             <button className="btn btn-primary me-2" onClick={() => setExibirModal(true)} disabled={!walletId}>
               + Nova Transação
             </button>
             <div className="d-flex align-items-center gap-2">
-              <div className="rounded-circle text-white d-flex align-items-center justify-content-center fw-bold" style={{ width: '38px', height: '38px' }}>
+              <div className="rounded-circle text-white d-flex align-items-center justify-content-center fw-bold" style={{ width: '2.3rem', height: '2.3rem' }}>
                 {usuarioInicial}
               </div>
               <span>{usuarioNome}</span>
@@ -234,29 +235,28 @@ function Dashboard() {
             <>
               <div className="row mb-4">
                 <div className="col-md-4 mb-3">
-                  <div className="card text-white p-3 border-0" style={{ backgroundColor: '#232943' }}>
+                  <CardComponent variant="painel">
                     <small className="text-white">Saldo Atual</small>
                     <h3 className="text-primary mt-2">R$ {resumo.saldoTotal.toFixed(2)}</h3>
-                  </div>
+                  </CardComponent>
                 </div>
                 <div className="col-md-4 mb-3">
-                  <div className="card text-white p-3 border-0" style={{ backgroundColor: '#232943' }}>
+                  <CardComponent variant="painel">
                     <small className="text-white">Receitas (Período)</small>
                     <h3 className="text-success mt-2">R$ {resumo.totalReceitas.toFixed(2)}</h3>
-                  </div>
+                  </CardComponent>
                 </div>
                 <div className="col-md-4 mb-3">
-                  <div className="card text-white p-3 border-0" style={{ backgroundColor: '#232943' }}>
+                  <CardComponent variant="painel">
                     <small className="text-white">Despesas (Período)</small>
                     <h3 className="text-danger mt-2">R$ {resumo.totalDespesas.toFixed(2)}</h3>
-                  </div>
+                  </CardComponent>
                 </div>
               </div>
 
               <div className="row">
                 <div className="col-lg-7 mb-4">
-                  <div className="card text-white p-3 h-100 border-0" style={{ backgroundColor: '#232943' }}>
-                    <h5 className="mb-3">Balanço dos Últimos Meses</h5>
+                  <CardComponent variant="painel" title="Balanço dos Últimos Meses" className="h-100">
                     <div style={{ height: '300px' }}>
                       {dadosGrafico.labels.length > 0 ? (
                         <Bar data={dadosGrafico} options={opcoesGrafico} />
@@ -266,12 +266,11 @@ function Dashboard() {
                         </div>
                       )}
                     </div>
-                  </div>
+                  </CardComponent>
                 </div>
 
                 <div className="col-lg-5 mb-4">
-                  <div className="card text-white p-3 h-100 border-0" style={{ backgroundColor: '#232943' }}>
-                    <h5 className="mb-3">Lançamentos Recentes</h5>
+                  <CardComponent variant="painel" title="Lançamentos Recentes" className="h-100">
                     {recentes.length > 0 ? (
                       <ul className="list-group list-group-flush">
                         {recentes.map((item, idx) => (
@@ -289,7 +288,7 @@ function Dashboard() {
                     ) : (
                       <p className="text-white my-auto text-center py-4">Nenhuma transação cadastrada.</p>
                     )}
-                  </div>
+                  </CardComponent>
                 </div>
               </div>
             </>
