@@ -128,6 +128,7 @@ function Carteiras() {
         <nav className="nav flex-column gap-2">
           <button className="btn btn-outline-light text-start w-100" onClick={() => navigate('/dashboard')}>Dashboard</button>
           <button className="btn btn-outline-light text-start w-100" onClick={() => navigate('/transacoes')}>Transações</button>
+          <button className="btn btn-outline-light text-start w-100" onClick={() => navigate('/relatorios')}>Relatórios</button>
           <button className="btn btn-outline-light text-start w-100" onClick={() => navigate('/categorias')}>Categorias</button>
           <button className="btn btn-primary text-start w-100">Carteiras</button>
           <button className="btn btn-outline-light text-start w-100">Perfil</button>
