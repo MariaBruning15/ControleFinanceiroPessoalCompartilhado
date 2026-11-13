@@ -189,7 +189,7 @@ function Dashboard() {
   };
 
   return (
-    <div className="d-flex text-white min-vh-100" style={{ backgroundColor: 'var(--bg)' }}>
+    <div className="dashboard-layout d-flex text-white min-vh-100">
       
       <aside className="p-3 border-end border-secondary d-flex flex-column" style={{ width: '20%', backgroundColor: 'var(--secondary-color)' }}>
         <h3 className="text-primary font-weight-bold mb-4">Mercúrio</h3>
@@ -205,7 +205,7 @@ function Dashboard() {
 
       <main className="flex-grow-1 d-flex flex-column">
         
-        <header className="p-3 border-secondary d-flex justify-content-between align-items-center" style={{ backgroundColor: 'var(--secondary-color)' }}>
+        <header className="p-3 border-secondary d-flex justify-content-between align-items-center" style={{ backgroundColor: 'transparent' }}>
           <h4 className="m-0">Resumo Financeiro</h4>
           <div className="d-flex align-items-center gap-3">
             <button className="btn btn-primary me-2" onClick={() => setExibirModal(true)} disabled={!walletId}>

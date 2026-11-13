@@ -9,7 +9,7 @@
   --primary-color: #3b4d8e;
   --secondary-color: #35296c;
   --tertiary-color: #270e65;
-  --bg: linear-gradient(180deg, #3b4d8e, #270e65);
+  --bg: radial-gradient(circle at top right, #3b4d8e, #270e65);
   --bg-container: white opacity(0.8);
 
   --text-color: #13182c;

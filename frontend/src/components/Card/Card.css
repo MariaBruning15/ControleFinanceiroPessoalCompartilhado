@@ -8,19 +8,31 @@
   box-sizing: border-box;
 }
 
-.card-container .card {
-  background-color: rgba(255, 255, 255, 0.08) !important;
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.2) !important;
-  border-radius: 20px !important;
+card-container .card {
+  /* Fundo translúcido levemente mais opaco para destacar o vidro */
+  background-color: rgba(255, 255, 255, 0.12) !important;
+  
+  /* Aumenta o desfoque do fundo para dar mais suavidade ao efeito "glass" */
+  backdrop-filter: blur(20px) !important;
+  -webkit-backdrop-filter: blur(20px) !important;
+  
+  /* Borda sutil translúcida */
+  border: 1px solid rgba(255, 255, 255, 0.35) !important;
+  
+  /* Cantos mais arredondados típicos do design moderno */
+  border-radius: 28px !important;
+  
   padding: 2.5rem 2rem !important;
   width: 100%;
   max-width: 400px;
   display: flex;
   flex-direction: column;
   align-items: center;
-  box-shadow: 0 0.5rem 1.5rem rgba(0, 0, 0, 0.3);
+  
+  box-shadow: 
+    0 8px 32px 0 rgba(0, 0, 0, 0.2), 
+    inset 0 1px 1px 0 rgba(255, 255, 255, 0.6),
+    inset 0 -1px 1px 0 rgba(255, 255, 255, 0.1) !important;
 }
 
 .card-title { 
@@ -113,13 +125,14 @@
   color: #555555 !important;
 }
 
-/* Variante "painel": mesmo visual de vidro do card de login, para as telas internas.
-   ".card.card-painel" (duas classes) vence o ".card" do Bootstrap sem precisar de !important. */
+
 .card.card-painel {
-  background-color: rgba(255, 255, 255, 0.08);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  border-radius: 20px;
-  box-shadow: 0 0.5rem 1.5rem rgba(0, 0, 0, 0.3);
+  background-color: rgba(255, 255, 255, 0.08) !important;
+  backdrop-filter: blur(16px) !important;
+  -webkit-backdrop-filter: blur(16px) !important;
+  border: 1px solid rgba(255, 255, 255, 0.25) !important;
+  border-radius: 24px !important;
+  box-shadow: 
+    0 8px 32px 0 rgba(0, 0, 0, 0.15), 
+    inset 0 1px 1px 0 rgba(255, 255, 255, 0.4) !important;
 }
