@@ -13,7 +13,6 @@ function RedefinirSenha() {
   const [erro, setErro] = useState('');
   const [carregando, setCarregando] = useState(false);
 
-  // Validação para garantir que o token está presente na URL (/redefinir-senha/:token)
   const isTokenValido = Boolean(token);
 
   const handleSubmit = async (e) => {
@@ -33,10 +32,8 @@ function RedefinirSenha() {
     setCarregando(true);
 
     try {
-      // Chama o método no UsuarioService que envia o token e a nova senha para a API
       await usuarioService.redefinirSenha(token, novaSenha);
 
-      // Redireciona para o login informando o sucesso via navegação
       navigate('/', { state: { mensagemSucesso: 'Senha redefinida com sucesso!' } });
     } catch (err) {
       if (err.response && err.response.data && err.response.data.message) {
@@ -50,7 +47,7 @@ function RedefinirSenha() {
   };
 
   return (
-    <div className="redefinir-senha-page">
+    <div className="redefinir-senha-page auth-background">
       <CardComponent subtitle="Redefinir Senha">
         {!isTokenValido ? (
           <div className="text-center text-white my-3 d-flex flex-column align-items-center">

@@ -53,7 +53,7 @@ function Cadastro() {
   };
 
   return (
-    <div className="cadastro-page">
+    <div className="cadastro-page auth-background">
       <CardComponent subtitle="Cadastro">
         <form onSubmit={handleSubmit} className="w-100 d-flex flex-column align-items-center">
           <div className="inputs w-100">

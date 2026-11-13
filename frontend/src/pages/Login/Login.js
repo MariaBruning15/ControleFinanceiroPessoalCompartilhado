@@ -32,7 +32,7 @@ function Login() {
   };
 
   return (
-    <div className="login-page">
+    <div className="login-page auth-background">
       <CardComponent subtitle="Login">
         <form className="d-flex flex-column align-items-center" onSubmit={handleSubmit}>
           <div className="inputs w-100">

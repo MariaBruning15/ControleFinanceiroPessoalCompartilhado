@@ -16,7 +16,6 @@ function RecuperarSenha() {
     setCarregando(true);
 
     try {
-      // Chama o método no UsuarioService que faz a requisição POST para o backend
       await usuarioService.solicitarRecuperacaoSenha(email);
       setEnviado(true);
     } catch (err) {
@@ -31,13 +30,11 @@ function RecuperarSenha() {
   };
 
   return (
-    <div className="recuperar-senha-page">
+    <div className="recuperar-senha-page auth-background">
       <CardComponent subtitle="Recuperar Senha">
         {enviado ? (
-          /* Mensagem neutra de confirmação após o envio bem-sucedido */
           <div className="text-center text-white my-3">
             <p className="mb-4">
-              Se o e-mail informado estiver cadastrado em nosso sistema, você receberá as instruções para redefinir sua senha.
             </p>
             <Link to="/" className="btn btn-custom fs-5">Voltar ao Login</Link>
           </div>
